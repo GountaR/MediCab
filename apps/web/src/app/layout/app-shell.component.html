@@ -55,7 +55,7 @@
     <header class="topbar">
       <div class="topbar__identity">
         <div class="topbar__breadcrumbs">
-          @for (crumb of currentPage().breadcrumbs; track crumb; let last = $last) {
+          @for (crumb of currentPage().breadcrumbs; track $index; let last = $last) {
             <span class="topbar__crumb" [class.topbar__crumb--current]="last">{{ crumb }}</span>
             @if (!last) {
               <span class="topbar__separator">/</span>

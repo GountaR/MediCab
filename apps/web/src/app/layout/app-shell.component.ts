@@ -7,16 +7,21 @@ import { filter, map, startWith } from 'rxjs/operators';
 import { NAV_SECTIONS, PAGE_BY_PATH, WORKSPACE_PAGES, WorkspacePageDefinition } from '../app.navigation';
 import { AppIconComponent } from '../shared/app-icon.component';
 
-function getDeepestRoute(route: ActivatedRoute): ActivatedRoute {
-  let current = route;
-  while (current.firstChild) {
+function getDeepestRoute(route: ActivatedRoute | null | undefined): ActivatedRoute | null {
+  let current = route ?? null;
+
+  while (current?.firstChild) {
     current = current.firstChild;
   }
+
   return current;
 }
 
-function getActivePage(route: ActivatedRoute): WorkspacePageDefinition {
-  return (getDeepestRoute(route).snapshot.data['page'] as WorkspacePageDefinition) ?? WORKSPACE_PAGES[0];
+function getActivePage(route: ActivatedRoute | null | undefined): WorkspacePageDefinition {
+  const activeRoute = getDeepestRoute(route);
+  const page = activeRoute?.snapshot?.data?.['page'] as WorkspacePageDefinition | undefined;
+
+  return page ?? WORKSPACE_PAGES[0];
 }
 
 @Component({
