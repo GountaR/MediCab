@@ -1,0 +1,604 @@
+<section class="settings-page">
+  <article class="hero-card">
+    <div>
+      <p class="hero-card__eyebrow">Administration · Paramètres</p>
+      <h2>Le cabinet récupère enfin un vrai panneau de configuration cohérent avec notre V1.</h2>
+      <p>
+        On reprend les sections clés du prototype admin tout en respectant le cadrage produit : un seul cabinet,
+        facturation simple et une base prête pour les futures APIs sans surcharger l'interface.
+      </p>
+    </div>
+
+    <div class="hero-card__aside">
+      <span>Section active</span>
+      <strong>{{ activeSection().label }}</strong>
+      <small>{{ activeSection().description }}</small>
+    </div>
+  </article>
+
+  <div class="summary-grid">
+    <article>
+      <p>Cabinet</p>
+      <strong>1</strong>
+      <span>V1 mono-cabinet confirmée dans le cadrage.</span>
+    </article>
+    <article>
+      <p>Jours ouverts</p>
+      <strong>{{ summary().openDays }}</strong>
+      <span>Horaires modifiables directement dans la maquette Angular.</span>
+    </article>
+    <article>
+      <p>Rappel email</p>
+      <strong>{{ summary().reminder }}</strong>
+      <span>Délai standard actuellement configuré pour les rendez-vous.</span>
+    </article>
+    <article>
+      <p>Sécurité</p>
+      <strong>{{ summary().security }}</strong>
+      <span>Sessions, audit et sauvegardes déjà visibles côté produit.</span>
+    </article>
+  </div>
+
+  @if (dirty() || saveState() === 'saved') {
+    <article class="save-bar" [class.save-bar--saved]="saveState() === 'saved' && !dirty()">
+      <div>
+        <strong>{{ saveState() === 'saved' && !dirty() ? 'Paramètres enregistrés.' : 'Modifications non sauvegardées.' }}</strong>
+        <p>
+          {{ saveState() === 'saved' && !dirty()
+            ? 'Le snapshot de référence du Sprint 3 est maintenant à jour.'
+            : 'On garde un comportement simple de mock : sauvegarde locale sans backend.' }}
+        </p>
+      </div>
+
+      <div class="save-bar__actions">
+        @if (dirty()) {
+          <button type="button" (click)="reset()">Annuler</button>
+          <button type="button" class="save-bar__primary" (click)="save()">Enregistrer</button>
+        }
+      </div>
+    </article>
+  }
+
+  <div class="settings-layout">
+    <aside class="settings-nav">
+      @for (item of sections; track item.id) {
+        <button
+          type="button"
+          class="settings-nav__item"
+          [class.settings-nav__item--active]="section() === item.id"
+          (click)="setSection(item.id)"
+        >
+          <span>{{ item.label }}</span>
+          <small>{{ item.description }}</small>
+        </button>
+      }
+    </aside>
+
+    <div class="settings-content">
+      @switch (section()) {
+        @case ('cabinet') {
+          <article class="settings-card">
+            <div class="settings-card__header">
+              <div>
+                <p>Cabinet médical</p>
+                <h3>Identité et coordonnées</h3>
+              </div>
+            </div>
+
+            <div class="form-grid form-grid--wide">
+              <label class="form-grid__full">
+                <span>Nom du cabinet</span>
+                <input
+                  type="text"
+                  [ngModel]="settings().cabinet.clinicName"
+                  (ngModelChange)="updateCabinetField('clinicName', $event)"
+                />
+              </label>
+
+              <label class="form-grid__full">
+                <span>Adresse</span>
+                <input
+                  type="text"
+                  [ngModel]="settings().cabinet.addressLine1"
+                  (ngModelChange)="updateCabinetField('addressLine1', $event)"
+                />
+              </label>
+
+              <label>
+                <span>Code postal</span>
+                <input
+                  type="text"
+                  [ngModel]="settings().cabinet.postalCode"
+                  (ngModelChange)="updateCabinetField('postalCode', $event)"
+                />
+              </label>
+
+              <label>
+                <span>Ville</span>
+                <input
+                  type="text"
+                  [ngModel]="settings().cabinet.city"
+                  (ngModelChange)="updateCabinetField('city', $event)"
+                />
+              </label>
+
+              <label>
+                <span>Téléphone</span>
+                <input
+                  type="text"
+                  [ngModel]="settings().cabinet.phone"
+                  (ngModelChange)="updateCabinetField('phone', $event)"
+                />
+              </label>
+
+              <label>
+                <span>Email</span>
+                <input
+                  type="email"
+                  [ngModel]="settings().cabinet.email"
+                  (ngModelChange)="updateCabinetField('email', $event)"
+                />
+              </label>
+
+              <label>
+                <span>Site web</span>
+                <input
+                  type="text"
+                  [ngModel]="settings().cabinet.website"
+                  (ngModelChange)="updateCabinetField('website', $event)"
+                />
+              </label>
+
+              <label>
+                <span>SIRET</span>
+                <input
+                  type="text"
+                  [ngModel]="settings().cabinet.siret"
+                  (ngModelChange)="updateCabinetField('siret', $event)"
+                />
+              </label>
+
+              <label>
+                <span>RPPS cabinet</span>
+                <input
+                  type="text"
+                  [ngModel]="settings().cabinet.rpps"
+                  (ngModelChange)="updateCabinetField('rpps', $event)"
+                />
+              </label>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <div class="settings-card__header">
+              <div>
+                <p>Horaires</p>
+                <h3>Ouverture du cabinet</h3>
+              </div>
+            </div>
+
+            <div class="hours-list">
+              @for (slot of settings().cabinet.hours; track slot.day; let index = $index) {
+                <div class="hours-row">
+                  <div class="hours-row__day">
+                    <strong>{{ slot.day }}</strong>
+                    <button type="button" (click)="updateHours(index, 'open', !slot.open)">
+                      {{ slot.open ? 'Ouvert' : 'Fermé' }}
+                    </button>
+                  </div>
+
+                  @if (slot.open) {
+                    <div class="hours-row__inputs">
+                      <input
+                        type="time"
+                        [ngModel]="slot.start"
+                        (ngModelChange)="updateHours(index, 'start', $event)"
+                      />
+                      <span>—</span>
+                      <input
+                        type="time"
+                        [ngModel]="slot.end"
+                        (ngModelChange)="updateHours(index, 'end', $event)"
+                      />
+                    </div>
+                  } @else {
+                    <p class="hours-row__closed">Pas de consultation ce jour-là.</p>
+                  }
+                </div>
+              }
+            </div>
+          </article>
+        }
+
+        @case ('rendezvous') {
+          <article class="settings-card">
+            <div class="settings-card__header">
+              <div>
+                <p>Rendez-vous</p>
+                <h3>Durées et comportement par défaut</h3>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                <span>Durée standard</span>
+                <select
+                  [ngModel]="settings().rendezVous.defaultDuration"
+                  (ngModelChange)="updateAppointmentField('defaultDuration', $event)"
+                >
+                  @for (minutes of ['15', '20', '30', '45', '60']; track minutes) {
+                    <option [value]="minutes">{{ minutes }} minutes</option>
+                  }
+                </select>
+              </label>
+
+              <label>
+                <span>Nouveau patient</span>
+                <select
+                  [ngModel]="settings().rendezVous.newPatientDuration"
+                  (ngModelChange)="updateAppointmentField('newPatientDuration', $event)"
+                >
+                  @for (minutes of ['30', '45', '60', '90']; track minutes) {
+                    <option [value]="minutes">{{ minutes }} minutes</option>
+                  }
+                </select>
+              </label>
+
+              <label>
+                <span>Acte médical</span>
+                <select
+                  [ngModel]="settings().rendezVous.procedureDuration"
+                  (ngModelChange)="updateAppointmentField('procedureDuration', $event)"
+                >
+                  @for (minutes of ['30', '45', '60', '90']; track minutes) {
+                    <option [value]="minutes">{{ minutes }} minutes</option>
+                  }
+                </select>
+              </label>
+
+              <label>
+                <span>Rappel email</span>
+                <select
+                  [ngModel]="settings().rendezVous.emailReminderHours"
+                  (ngModelChange)="updateAppointmentField('emailReminderHours', $event)"
+                >
+                  @for (hours of ['4', '12', '24', '48']; track hours) {
+                    <option [value]="hours">{{ hours }} heures avant</option>
+                  }
+                </select>
+              </label>
+            </div>
+
+            <div class="toggle-card">
+              <div>
+                <strong>Consultation sans rendez-vous</strong>
+                <p>Le cadrage V1 l'autorise. On garde donc ce comportement activable côté produit.</p>
+              </div>
+              <button
+                type="button"
+                class="toggle"
+                [class.toggle--on]="settings().rendezVous.allowWalkIns"
+                (click)="updateAppointmentField('allowWalkIns', !settings().rendezVous.allowWalkIns)"
+              >
+                <span></span>
+              </button>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <div class="settings-card__header">
+              <div>
+                <p>Types de rendez-vous</p>
+                <h3>Catalogue visible en réception</h3>
+              </div>
+            </div>
+
+            <div class="tag-list">
+              @for (type of settings().rendezVous.appointmentTypes; track type) {
+                <span>
+                  {{ type }}
+                  <button type="button" (click)="removeAppointmentType(type)">×</button>
+                </span>
+              }
+            </div>
+
+            <div class="inline-form">
+              <input
+                type="text"
+                [ngModel]="newAppointmentType()"
+                (ngModelChange)="newAppointmentType.set($event)"
+                placeholder="Ajouter un nouveau type..."
+              />
+              <button type="button" (click)="addAppointmentType()">Ajouter</button>
+            </div>
+          </article>
+        }
+
+        @case ('facturation') {
+          <article class="settings-card">
+            <div class="settings-card__header">
+              <div>
+                <p>Facturation</p>
+                <h3>Règles simples de la V1</h3>
+              </div>
+            </div>
+
+            <div class="note-card">
+              <strong>Important</strong>
+              <p>
+                MediCab V1 ne stocke pas le moyen de paiement. On pilote uniquement les montants, le reste à payer et le
+                statut de facture.
+              </p>
+            </div>
+
+            <div class="toggle-card">
+              <div>
+                <strong>Préparer une facture depuis le rendez-vous / la consultation</strong>
+                <p>On garde la logique semi-manuelle validée pendant le cadrage.</p>
+              </div>
+              <button
+                type="button"
+                class="toggle"
+                [class.toggle--on]="settings().facturation.autoPrepareInvoice"
+                (click)="updateBillingField('autoPrepareInvoice', !settings().facturation.autoPrepareInvoice)"
+              >
+                <span></span>
+              </button>
+            </div>
+
+            <div class="toggle-card">
+              <div>
+                <strong>Afficher les alertes d'impayés en réception</strong>
+                <p>Permet de remonter visuellement les retards dans le tableau de bord et la facturation.</p>
+              </div>
+              <button
+                type="button"
+                class="toggle"
+                [class.toggle--on]="settings().facturation.showDebtAlerts"
+                (click)="updateBillingField('showDebtAlerts', !settings().facturation.showDebtAlerts)"
+              >
+                <span></span>
+              </button>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                <span>Délai de règlement par défaut</span>
+                <select
+                  [ngModel]="settings().facturation.paymentDelayDays"
+                  (ngModelChange)="updateBillingField('paymentDelayDays', $event)"
+                >
+                  @for (days of ['0', '15', '30', '45']; track days) {
+                    <option [value]="days">{{ days === '0' ? 'Paiement immédiat' : days + ' jours' }}</option>
+                  }
+                </select>
+              </label>
+
+              <label>
+                <span>Relance visuelle après</span>
+                <select
+                  [ngModel]="settings().facturation.overdueReminderDays"
+                  (ngModelChange)="updateBillingField('overdueReminderDays', $event)"
+                >
+                  @for (days of ['15', '30', '45', '60']; track days) {
+                    <option [value]="days">{{ days }} jours</option>
+                  }
+                </select>
+              </label>
+            </div>
+          </article>
+        }
+
+        @case ('notifications') {
+          <article class="settings-card">
+            <div class="settings-card__header">
+              <div>
+                <p>Notifications</p>
+                <h3>Canaux retenus pour la V1</h3>
+              </div>
+            </div>
+
+            <div class="note-card">
+              <strong>Hors périmètre V1</strong>
+              <p>Les SMS et WhatsApp ne sont pas activés pour l'instant. On garde un paramétrage centré sur les emails utiles.</p>
+            </div>
+
+            <div class="toggle-list">
+              <div class="toggle-card">
+                <div>
+                  <strong>Rappel de rendez-vous</strong>
+                  <p>Email envoyé au patient avant la consultation.</p>
+                </div>
+                <button
+                  type="button"
+                  class="toggle"
+                  [class.toggle--on]="settings().notifications.appointmentReminderEmail"
+                  (click)="updateNotification('appointmentReminderEmail', !settings().notifications.appointmentReminderEmail)"
+                >
+                  <span></span>
+                </button>
+              </div>
+
+              <div class="toggle-card">
+                <div>
+                  <strong>Confirmation de rendez-vous</strong>
+                  <p>Message envoyé juste après la prise de rendez-vous.</p>
+                </div>
+                <button
+                  type="button"
+                  class="toggle"
+                  [class.toggle--on]="settings().notifications.appointmentConfirmationEmail"
+                  (click)="updateNotification('appointmentConfirmationEmail', !settings().notifications.appointmentConfirmationEmail)"
+                >
+                  <span></span>
+                </button>
+              </div>
+
+              <div class="toggle-card">
+                <div>
+                  <strong>Annulation de rendez-vous</strong>
+                  <p>Notification envoyée au patient quand un créneau est annulé.</p>
+                </div>
+                <button
+                  type="button"
+                  class="toggle"
+                  [class.toggle--on]="settings().notifications.cancellationEmail"
+                  (click)="updateNotification('cancellationEmail', !settings().notifications.cancellationEmail)"
+                >
+                  <span></span>
+                </button>
+              </div>
+
+              <div class="toggle-card">
+                <div>
+                  <strong>Résultats d'analyses disponibles</strong>
+                  <p>Alerte email interne quand un document critique arrive au cabinet.</p>
+                </div>
+                <button
+                  type="button"
+                  class="toggle"
+                  [class.toggle--on]="settings().notifications.labResultsEmail"
+                  (click)="updateNotification('labResultsEmail', !settings().notifications.labResultsEmail)"
+                >
+                  <span></span>
+                </button>
+              </div>
+
+              <div class="toggle-card">
+                <div>
+                  <strong>Renouvellement d'ordonnance</strong>
+                  <p>Rappel email préparatoire pour la continuité de suivi.</p>
+                </div>
+                <button
+                  type="button"
+                  class="toggle"
+                  [class.toggle--on]="settings().notifications.prescriptionReminderEmail"
+                  (click)="updateNotification('prescriptionReminderEmail', !settings().notifications.prescriptionReminderEmail)"
+                >
+                  <span></span>
+                </button>
+              </div>
+
+              <div class="toggle-card">
+                <div>
+                  <strong>Alertes administrateur</strong>
+                  <p>Connexions échouées, erreurs système et événements sensibles.</p>
+                </div>
+                <button
+                  type="button"
+                  class="toggle"
+                  [class.toggle--on]="settings().notifications.adminAlertsEmail"
+                  (click)="updateNotification('adminAlertsEmail', !settings().notifications.adminAlertsEmail)"
+                >
+                  <span></span>
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+
+        @case ('securite') {
+          <article class="settings-card">
+            <div class="settings-card__header">
+              <div>
+                <p>Sécurité</p>
+                <h3>Sessions, audit et sauvegardes</h3>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                <span>Longueur minimale du mot de passe</span>
+                <select
+                  [ngModel]="settings().security.minPasswordLength"
+                  (ngModelChange)="updateSecurityField('minPasswordLength', $event)"
+                >
+                  @for (size of ['8', '10', '12']; track size) {
+                    <option [value]="size">{{ size }} caractères</option>
+                  }
+                </select>
+              </label>
+
+              <label>
+                <span>Expiration de session</span>
+                <select
+                  [ngModel]="settings().security.sessionTimeoutMinutes"
+                  (ngModelChange)="updateSecurityField('sessionTimeoutMinutes', $event)"
+                >
+                  @for (timeout of [['15', '15 minutes'], ['30', '30 minutes'], ['60', '1 heure'], ['120', '2 heures']]; track timeout[0]) {
+                    <option [value]="timeout[0]">{{ timeout[1] }}</option>
+                  }
+                </select>
+              </label>
+            </div>
+
+            <div class="toggle-list">
+              <div class="toggle-card">
+                <div>
+                  <strong>Double authentification obligatoire</strong>
+                  <p>Prépare le terrain pour le Sprint 5, même si la mécanique réelle viendra avec le backend.</p>
+                </div>
+                <button
+                  type="button"
+                  class="toggle"
+                  [class.toggle--on]="settings().security.forceTwoFactor"
+                  (click)="updateSecurityField('forceTwoFactor', !settings().security.forceTwoFactor)"
+                >
+                  <span></span>
+                </button>
+              </div>
+
+              <div class="toggle-card">
+                <div>
+                  <strong>Audit des connexions</strong>
+                  <p>Historise les connexions et les tentatives sensibles dans le futur journal d'audit.</p>
+                </div>
+                <button
+                  type="button"
+                  class="toggle"
+                  [class.toggle--on]="settings().security.auditConnections"
+                  (click)="updateSecurityField('auditConnections', !settings().security.auditConnections)"
+                >
+                  <span></span>
+                </button>
+              </div>
+            </div>
+          </article>
+
+          <article class="settings-card">
+            <div class="settings-card__header">
+              <div>
+                <p>Sauvegardes</p>
+                <h3>Indicateurs de continuité</h3>
+              </div>
+            </div>
+
+            <div class="backup-grid">
+              <article>
+                <p>Fréquence</p>
+                <strong>{{ settings().security.backupFrequency }}</strong>
+              </article>
+              <article>
+                <p>Dernière sauvegarde</p>
+                <strong>{{ settings().security.lastBackupAt }}</strong>
+              </article>
+              <article>
+                <p>Rétention</p>
+                <strong>{{ settings().security.retentionDays }} jours</strong>
+              </article>
+              <article>
+                <p>Stockage</p>
+                <strong>{{ settings().security.storageUsed }} / {{ settings().security.storageQuota }}</strong>
+              </article>
+            </div>
+
+            <div class="note-card note-card--danger">
+              <strong>Zone sensible</strong>
+              <p>Les actions destructives restent volontairement hors périmètre du mock. On montre l'intention produit sans déclencher d'effet réel.</p>
+            </div>
+          </article>
+        }
+      }
+    </div>
+  </div>
+</section>

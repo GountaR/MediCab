@@ -1,0 +1,271 @@
+:host {
+  display: block;
+}
+
+.prescriptions-page {
+  display: grid;
+  grid-template-columns: minmax(20rem, 24rem) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.sidebar-card,
+.list-card,
+.detail-card,
+.instruction-card,
+.empty-state {
+  border-radius: 1.35rem;
+  border: 1px solid rgba(10, 34, 58, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--mc-shadow-soft);
+}
+
+.prescriptions-sidebar {
+  display: grid;
+  gap: 1rem;
+}
+
+.sidebar-card,
+.detail-card,
+.instruction-card,
+.empty-state {
+  padding: 1.2rem;
+}
+
+.sidebar-card__eyebrow,
+.detail-card__eyebrow,
+.instruction-card__eyebrow {
+  margin: 0;
+  color: #1d5fa8;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.sidebar-card h2,
+.detail-card h3 {
+  margin: 0.45rem 0 0;
+  color: #10233b;
+  font-family: var(--mc-heading-font);
+  letter-spacing: -0.04em;
+}
+
+.sidebar-card p:not(.sidebar-card__eyebrow),
+.instruction-card p,
+.empty-state p {
+  color: #57697c;
+  line-height: 1.6;
+}
+
+.sidebar-card__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.sidebar-card__field span,
+.medication-list__grid span,
+.detail-card__meta span,
+.medication-list__header small {
+  color: #627487;
+  font-size: 0.82rem;
+}
+
+.sidebar-card__field input,
+.filter-pills button,
+.detail-card__actions a {
+  min-height: 2.85rem;
+  border-radius: 0.95rem;
+}
+
+.sidebar-card__field input {
+  border: 1px solid rgba(16, 35, 59, 0.12);
+  background: white;
+  padding: 0.78rem 0.9rem;
+  color: #10233b;
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.filter-pills button {
+  border: 1px solid rgba(16, 35, 59, 0.08);
+  background: rgba(16, 35, 59, 0.05);
+  color: #5b6d80;
+  padding: 0 0.95rem;
+  font-weight: 700;
+}
+
+.filter-pills__button--active {
+  background: #1d5fa8 !important;
+  color: white !important;
+  border-color: transparent !important;
+}
+
+.list-card {
+  padding: 0.4rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.list-card__item {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(10, 34, 58, 0.05);
+  background: rgba(16, 35, 59, 0.03);
+  text-align: left;
+}
+
+.list-card__item--active {
+  background: rgba(29, 95, 168, 0.09);
+  border-color: rgba(29, 95, 168, 0.16);
+}
+
+.list-card__item strong,
+.medication-list strong {
+  display: block;
+  color: #10233b;
+}
+
+.list-card__item small {
+  display: block;
+  margin-top: 0.28rem;
+  color: #627487;
+}
+
+.detail-card__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.detail-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.7rem;
+}
+
+.detail-card__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  gap: 0.65rem;
+}
+
+.detail-card__actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(29, 95, 168, 0.14);
+  background: rgba(29, 95, 168, 0.08);
+  color: #1d5fa8;
+  padding: 0 1rem;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.alert-box,
+.medication-list article,
+.instruction-card {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(16, 35, 59, 0.04);
+}
+
+.alert-box {
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.alert-box strong,
+.alert-box p {
+  margin: 0;
+  color: #a22f2f;
+}
+
+.medication-list {
+  display: grid;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.medication-list__header,
+.medication-list__grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.medication-list__header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.medication-list__header div {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.medication-list__header span {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: rgba(16, 35, 59, 0.06);
+  color: #627487;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.medication-list__grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 0.8rem;
+}
+
+.medication-list__grid p,
+.instruction-card p {
+  margin: 0.35rem 0 0;
+  color: #10233b;
+}
+
+.medication-list__instruction {
+  margin: 0.85rem 0 0;
+  color: #1d5fa8;
+  font-weight: 700;
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.empty-state--compact {
+  min-height: 10rem;
+}
+
+@media (max-width: 1080px) {
+  .prescriptions-page,
+  .medication-list__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-card__header {
+    flex-direction: column;
+  }
+
+  .detail-card__actions {
+    align-items: start;
+  }
+}

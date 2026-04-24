@@ -1,29 +1,30 @@
 <section class="dashboard-grid">
-  <div class="hero-panel">
-    <p class="hero-panel__eyebrow">Sprint 2 · Shell Angular</p>
-    <h2>Une base navigable, propre et prête pour l'intégration Figma.</h2>
+  <article class="hero-panel">
+    <p class="hero-panel__eyebrow">Sprint 3 · Intégration avec mocks</p>
+    <h2>Le shell MediCab commence maintenant à parler le langage réel du cabinet.</h2>
     <p class="hero-panel__text">
-      Le shell MediCab sert maintenant de point d'ancrage pour tous les modules. Chaque carte ci-dessous correspond a une zone
-      qui sera branchée avec les écrans du prototype et les mocks au Sprint 3.
+      Nous branchons les premières données fidèles au prototype exporté : patients, rendez-vous du jour, impayés et
+      navigation métier. La base Angular devient démontrable sans attendre les APIs .NET.
     </p>
 
     <div class="hero-panel__actions">
-      <a routerLink="/patients">Explorer les patients</a>
-      <a routerLink="/consultations" class="hero-panel__actions--secondary">Préparer l'espace clinique</a>
+      <a routerLink="/patients">Ouvrir la liste patients</a>
+      <a routerLink="/facturation" class="hero-panel__actions--secondary">Revoir la facturation V1</a>
     </div>
-  </div>
+  </article>
 
-  <div class="snapshot-card">
-    <p class="snapshot-card__eyebrow">Capsule produit</p>
-    <ul>
-      <li>Interface en français, formats FR et cabinet unique.</li>
-      <li>Facturation V1 simplifiée autour des montants et statuts.</li>
-      <li>Visibilité médecin limitée aux patients déjà consultés.</li>
-    </ul>
-  </div>
+  <article class="snapshot-card">
+    <p class="snapshot-card__eyebrow">Référence data</p>
+    <strong>{{ referenceDate }}</strong>
+    <p class="snapshot-card__text">Jeu de démonstration francophone, cabinet unique, facturation simple centrée sur les montants.</p>
+    <div class="snapshot-card__summary">
+      <span>{{ invoiceSummary().ouvertes }} factures ouvertes</span>
+      <strong>{{ invoiceSummary().totalRestant }}</strong>
+    </div>
+  </article>
 
   <div class="metrics">
-    @for (metric of metrics; track metric.label) {
+    @for (metric of metrics(); track metric.label) {
       <article class="metric-card">
         <p class="metric-card__label">{{ metric.label }}</p>
         <strong>{{ metric.value }}</strong>
@@ -32,10 +33,52 @@
     }
   </div>
 
-  <div class="section-card">
+  <article class="section-card">
+    <div class="section-card__header">
+      <p>Flux du jour</p>
+      <h3>Rendez-vous prioritaires</h3>
+    </div>
+
+    <div class="appointment-list">
+      @for (item of todayAppointments(); track item.id) {
+        <a class="appointment-item" routerLink="/patients/{{ item.patientId }}">
+          <div>
+            <span class="appointment-item__time">{{ item.heure }}</span>
+            <strong>{{ item.patient }}</strong>
+            <small>{{ item.type }} · Dr. {{ item.medecin?.nom }}</small>
+          </div>
+          <app-status-chip [tone]="appointmentTone(item.statut)">{{ item.statut }}</app-status-chip>
+        </a>
+      }
+    </div>
+  </article>
+
+  <article class="section-card">
+    <div class="section-card__header">
+      <p>Vigilance</p>
+      <h3>Patients à relancer</h3>
+    </div>
+
+    <div class="watchlist">
+      @for (item of watchlistPatients(); track item.id) {
+        <a class="watchlist-item" routerLink="/patients/{{ item.id }}">
+          <div>
+            <strong>{{ item.nomComplet }}</strong>
+            <small>Dr. {{ item.medecin?.nom }} · {{ item.prochainRdv }}</small>
+          </div>
+          <div class="watchlist-item__meta">
+            <app-status-chip [tone]="patientTone(item.statut)">{{ item.statut }}</app-status-chip>
+            <span>{{ item.solde }}</span>
+          </div>
+        </a>
+      }
+    </div>
+  </article>
+
+  <article class="section-card section-card--full">
     <div class="section-card__header">
       <p>Espaces métiers</p>
-      <h3>Les trois parcours qui guideront l'intégration</h3>
+      <h3>Les trois parcours à garder lisibles dès la V1</h3>
     </div>
 
     <div class="role-grid">
@@ -46,12 +89,12 @@
         </article>
       }
     </div>
-  </div>
+  </article>
 
-  <div class="section-card section-card--full">
+  <article class="section-card section-card--full">
     <div class="section-card__header">
       <p>Modules</p>
-      <h3>Navigation cible de la V1</h3>
+      <h3>Navigation cible de MediCab</h3>
     </div>
 
     <div class="module-columns">
@@ -74,5 +117,5 @@
         </div>
       }
     </div>
-  </div>
+  </article>
 </section>

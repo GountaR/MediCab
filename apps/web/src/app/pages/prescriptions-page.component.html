@@ -1,0 +1,117 @@
+<section class="prescriptions-page">
+  <aside class="prescriptions-sidebar">
+    <article class="sidebar-card">
+      <p class="sidebar-card__eyebrow">Ordonnances</p>
+      <h2>Prescription et aperçu</h2>
+      <p>Le module reste centré sur les traitements, les statuts d'ordonnance et la relecture rapide avant impression.</p>
+    </article>
+
+    <article class="sidebar-card">
+      <label class="sidebar-card__field">
+        <span>Recherche</span>
+        <input type="search" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Patient, médicament, ordonnance" />
+      </label>
+
+      <div class="filter-pills">
+        @for (status of statuses; track status) {
+          <button type="button" [class.filter-pills__button--active]="statusFilter() === status" (click)="statusFilter.set(status)">
+            {{ status }}
+          </button>
+        }
+      </div>
+    </article>
+
+    <article class="list-card">
+      @for (ordonnance of filtered(); track ordonnance.id) {
+        <button type="button" class="list-card__item" [class.list-card__item--active]="selectedId() === ordonnance.id" (click)="selectedId.set(ordonnance.id)">
+          <div>
+            <strong>{{ getNomComplet(demoStore.getPatient(ordonnance.patientId)!) }}</strong>
+            <small>{{ ordonnance.date }} · {{ ordonnance.id.toUpperCase() }}</small>
+            <small>{{ ordonnance.medicaments.length }} médicament(s)</small>
+          </div>
+          <app-status-chip [tone]="ordonnanceTone(ordonnance.statut)">{{ ordonnance.statut }}</app-status-chip>
+        </button>
+      } @empty {
+        <div class="empty-state empty-state--compact">
+          <h3>Aucune ordonnance trouvée</h3>
+          <p>Essaie un autre filtre ou une autre recherche.</p>
+        </div>
+      }
+    </article>
+  </aside>
+
+  <main class="prescriptions-main">
+    @if (selected(); as ordonnance) {
+      <article class="detail-card">
+        <div class="detail-card__header">
+          <div>
+            <p class="detail-card__eyebrow">Ordonnance sélectionnée</p>
+            <h3>{{ ordonnance.id.toUpperCase() }}</h3>
+            <div class="detail-card__meta">
+              <span>{{ ordonnance.date }}</span>
+              <span>{{ selectedPatient() ? getNomComplet(selectedPatient()!) : 'Patient inconnu' }}</span>
+              <span>Dr. {{ medecinActif?.prenom }} {{ medecinActif?.nom }}</span>
+            </div>
+          </div>
+
+          <div class="detail-card__actions">
+            <app-status-chip [tone]="ordonnanceTone(ordonnance.statut)">{{ ordonnance.statut }}</app-status-chip>
+            @if (selectedPatient(); as patient) {
+              <a routerLink="/patients/{{ patient.id }}">Voir le dossier</a>
+            }
+          </div>
+        </div>
+
+        @if (selectedPatient()?.allergies?.length) {
+          <div class="alert-box">
+            <strong>Alerte allergie</strong>
+            <p>{{ selectedPatient()?.allergies?.join(', ') }}</p>
+          </div>
+        }
+
+        <div class="medication-list">
+          @for (medicament of ordonnance.medicaments; track medicament.id; let idx = $index) {
+            <article>
+              <div class="medication-list__header">
+                <div>
+                  <span>{{ idx + 1 }}</span>
+                  <strong>{{ medicament.dci }} {{ medicament.dosage }}</strong>
+                </div>
+                <small>{{ medicament.quantite }} · {{ medicament.renouvellement }} renouvellement(s)</small>
+              </div>
+              <div class="medication-list__grid">
+                <div>
+                  <span>Posologie</span>
+                  <p>{{ medicament.posologie }}</p>
+                </div>
+                <div>
+                  <span>Voie</span>
+                  <p>{{ medicament.voie }}</p>
+                </div>
+                <div>
+                  <span>Durée</span>
+                  <p>{{ medicament.duree }}</p>
+                </div>
+              </div>
+              @if (medicament.instructions) {
+                <p class="medication-list__instruction">{{ medicament.instructions }}</p>
+              }
+            </article>
+          }
+        </div>
+
+        @if (ordonnance.instructions) {
+          <article class="instruction-card">
+            <p class="instruction-card__eyebrow">Consignes patient</p>
+            <p>{{ ordonnance.instructions }}</p>
+          </article>
+        }
+      </article>
+    } @else {
+      <div class="empty-state">
+        <h3>Sélectionne une ordonnance pour voir son détail.</h3>
+        <p>Le Sprint 3 relie ici la liste médecin et l'aperçu de prescription.</p>
+      </div>
+    }
+  </main>
+</section>

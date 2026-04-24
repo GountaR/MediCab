@@ -1,0 +1,166 @@
+@if (patient(); as patientRecord) {
+  <section class="detail-page">
+    <div class="detail-topbar">
+      <a routerLink="/patients">← Retour à la liste</a>
+      <div class="detail-topbar__actions">
+        <a routerLink="/rendez-vous">Voir l'agenda</a>
+        <a routerLink="/facturation">Ouvrir la facturation</a>
+      </div>
+    </div>
+
+    <article class="hero-card">
+      <div class="hero-card__identity">
+        <div class="hero-card__avatar" [style.background]="medecin()?.couleur || '#1d5fa8'">{{ initials() }}</div>
+        <div>
+          <p class="hero-card__eyebrow">Dossier patient</p>
+          <h2>{{ nomComplet() }}</h2>
+          <div class="hero-card__meta">
+            <span>{{ patientRecord.dpi }}</span>
+            <span>{{ patientRecord.dateNaissance }} · {{ age() }} ans</span>
+            <span>{{ patientRecord.groupeSanguin }}</span>
+          </div>
+          <div class="hero-card__chips">
+            <app-status-chip [tone]="patientTone(patientRecord.statut)">{{ patientRecord.statut }}</app-status-chip>
+            @if ((patientRecord.soldeImpaye ?? 0) > 0) {
+              <app-status-chip tone="danger">{{ formatMontant(patientRecord.soldeImpaye ?? 0) }} impayé</app-status-chip>
+            }
+            @if (prochainRendezVous(); as prochain) {
+              <app-status-chip tone="accent">Prochain RDV · {{ prochain.date }} à {{ prochain.heure }}</app-status-chip>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-card__referent">
+        <span>Médecin référent</span>
+        <strong>Dr. {{ medecin()?.prenom }} {{ medecin()?.nom }}</strong>
+        <small>{{ medecin()?.specialite }}</small>
+      </div>
+    </article>
+
+    @if (patientRecord.allergies.length) {
+      <article class="alert-card">
+        <strong>Allergies et contre-indications</strong>
+        <p>{{ patientRecord.allergies.join(', ') }}</p>
+      </article>
+    }
+
+    <div class="overview-grid">
+      <article class="info-card">
+        <p>Coordonnées</p>
+        <dl>
+          <div>
+            <dt>Téléphone</dt>
+            <dd>{{ patientRecord.telephone }}</dd>
+          </div>
+          <div>
+            <dt>E-mail</dt>
+            <dd>{{ patientRecord.email || 'Non renseigné' }}</dd>
+          </div>
+          <div>
+            <dt>Adresse</dt>
+            <dd>{{ patientRecord.adresse }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article class="info-card">
+        <p>Couverture et suivi</p>
+        <dl>
+          <div>
+            <dt>Mutuelle</dt>
+            <dd>{{ patientRecord.mutuelle }}</dd>
+          </div>
+          <div>
+            <dt>Dernière visite</dt>
+            <dd>{{ patientRecord.dernierVisite || 'Aucune' }}</dd>
+          </div>
+          <div>
+            <dt>Etiquettes</dt>
+            <dd>{{ patientRecord.etiquettes?.length ? patientRecord.etiquettes?.join(', ') : 'Aucune' }}</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article class="info-card">
+        <p>Règle V1</p>
+        <dl>
+          <div>
+            <dt>Cabinet</dt>
+            <dd>Cabinet unique</dd>
+          </div>
+          <div>
+            <dt>Référence de mock</dt>
+            <dd>{{ referenceDate }}</dd>
+          </div>
+          <div>
+            <dt>Accès médecin</dt>
+            <dd>Limité à ses patients déjà consultés</dd>
+          </div>
+        </dl>
+      </article>
+    </div>
+
+    <div class="content-grid">
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <p>Rendez-vous liés</p>
+            <h3>Historique et planning</h3>
+          </div>
+          <span>{{ rendezVous().length }} enregistrements</span>
+        </div>
+
+        <div class="list-stack">
+          @for (rendezVousItem of rendezVous(); track rendezVousItem.id) {
+            <div class="list-row">
+              <div>
+                <strong>{{ rendezVousItem.date }} · {{ rendezVousItem.heure }}</strong>
+                <small>{{ rendezVousItem.type }} · Dr. {{ demoStore.getMedecin(rendezVousItem.medecinId)?.nom }}</small>
+              </div>
+              <app-status-chip [tone]="appointmentTone(rendezVousItem.statut)">{{ rendezVousItem.statut }}</app-status-chip>
+            </div>
+          }
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <p>Factures ouvertes</p>
+            <h3>Solde administratif</h3>
+          </div>
+          <span>{{ facturesOuvertes().length }} ligne(s)</span>
+        </div>
+
+        @if (facturesOuvertes().length) {
+          <div class="list-stack">
+            @for (facture of facturesOuvertes(); track facture.id) {
+              <div class="list-row list-row--invoice">
+                <div>
+                  <strong>{{ facture.numero }}</strong>
+                  <small>{{ facture.motif }} · Échéance {{ facture.echeance }}</small>
+                </div>
+                <div class="list-row__invoice-meta">
+                  <app-status-chip [tone]="invoiceTone(facture.statut)">{{ facture.statut }}</app-status-chip>
+                  <span>{{ montantRestant(facture.montantTotal, facture.montantRegle) }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="empty-card">
+            <strong>Aucun solde ouvert</strong>
+            <p>Ce dossier n'a pas de facture restante dans le jeu de démonstration actuel.</p>
+          </div>
+        }
+      </article>
+    </div>
+  </section>
+} @else {
+  <section class="not-found-card">
+    <p>Patient introuvable</p>
+    <h2>Le dossier demandé n'existe pas dans le mock actuel.</h2>
+    <a routerLink="/patients">Retour à la liste patients</a>
+  </section>
+}

@@ -1,0 +1,329 @@
+<section class="users-page">
+  <article class="hero-card">
+    <div>
+      <p class="hero-card__eyebrow">Administration · Utilisateurs</p>
+      <h2>On boucle le Sprint 3 avec la gestion des comptes, des rôles et des accès V1.</h2>
+      <p>
+        Cette vue reprend l'esprit du prototype admin : filtres rapides, états de comptes, édition latérale et lecture
+        immédiate des rôles système sans attendre le backend .NET.
+      </p>
+    </div>
+
+    <div class="hero-card__aside">
+      <span>Comptes actifs</span>
+      <strong>{{ summary().active }}</strong>
+      <small>{{ summary().total }} compte(s) dans le socle mock actuel</small>
+    </div>
+  </article>
+
+  <div class="summary-grid">
+    <article>
+      <p>Total</p>
+      <strong>{{ summary().total }}</strong>
+      <span>Comptes staff synchronisés avec la maquette admin.</span>
+    </article>
+    <article>
+      <p>Administrateurs</p>
+      <strong>{{ summary().admins }}</strong>
+      <span>Accès complet au pilotage et à l'audit.</span>
+    </article>
+    <article>
+      <p>Médecins</p>
+      <strong>{{ summary().doctors }}</strong>
+      <span>Accès clinique réservé aux patients déjà suivis.</span>
+    </article>
+    <article>
+      <p>Réception</p>
+      <strong>{{ summary().frontdesk }}</strong>
+      <span>Accueil, planning et facturation administrative.</span>
+    </article>
+  </div>
+
+  <article class="toolbar-card">
+    <div class="toolbar-card__filters">
+      <label>
+        <span>Recherche</span>
+        <input
+          type="search"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+          placeholder="Nom, email ou rôle"
+        />
+      </label>
+
+      <label>
+        <span>Rôle</span>
+        <select [ngModel]="roleFilter()" (ngModelChange)="roleFilter.set($event)">
+          @for (role of roleOptions; track role) {
+            <option [value]="role">{{ role }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Statut</span>
+        <select [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)">
+          @for (status of statusOptions; track status) {
+            <option [value]="status">{{ status }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="toolbar-card__actions">
+      <span>{{ filteredUsers().length }} résultat(s)</span>
+      <button type="button" (click)="openCreate()">Nouvel utilisateur</button>
+    </div>
+  </article>
+
+  <article class="list-card">
+    <div class="list-card__header">
+      <p>Comptes du cabinet</p>
+      <h3>Équipe MediCab</h3>
+    </div>
+
+    @if (filteredUsers().length) {
+      <div class="user-table">
+        <div class="user-table__head">
+          <span>Utilisateur</span>
+          <span>Rôle</span>
+          <span>Spécialité</span>
+          <span>Statut</span>
+          <span>Dernière connexion</span>
+          <span class="user-table__align-end">Actions</span>
+        </div>
+
+        @for (user of filteredUsers(); track user.id) {
+          <div class="user-row" [class.user-row--muted]="user.status === 'Suspendu'">
+            <div class="user-row__identity">
+              <div class="user-avatar" [style.background]="user.color">{{ user.initials }}</div>
+              <div>
+                <strong>{{ user.firstName }} {{ user.lastName }}</strong>
+                <small>{{ user.email }}</small>
+              </div>
+            </div>
+
+            <div>
+              <span class="role-pill" [class]="roleTone(user.role)">{{ user.role }}</span>
+            </div>
+
+            <div>
+              <span>{{ user.specialty || '—' }}</span>
+            </div>
+
+            <div>
+              <app-status-chip [tone]="userTone(user.status)">{{ user.status }}</app-status-chip>
+            </div>
+
+            <div>
+              <span>{{ user.lastConnection || '—' }}</span>
+            </div>
+
+            <div class="user-row__actions">
+              @if (confirmToggleId() === user.id) {
+                <button type="button" class="user-row__action user-row__action--danger" (click)="toggleAccount(user.id)">
+                  Confirmer
+                </button>
+                <button type="button" class="user-row__action" (click)="cancelToggle()">Annuler</button>
+              } @else {
+                <button type="button" class="user-row__action" (click)="openEdit(user)">Modifier</button>
+                @if (user.role !== 'Administrateur') {
+                  <button type="button" class="user-row__action" (click)="confirmToggle(user.id)">
+                    {{ user.status === 'Suspendu' ? 'Réactiver' : 'Suspendre' }}
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <h3>Aucun utilisateur ne correspond à ces filtres.</h3>
+        <p>Élargis la recherche ou change le rôle / statut sélectionné.</p>
+      </div>
+    }
+  </article>
+
+  <article class="roles-card">
+    <div class="roles-card__header">
+      <div>
+        <p>Matrice de rôles</p>
+        <h3>Permissions système de la V1</h3>
+      </div>
+      <small>Lecture claire du RBAC avant le Sprint 4</small>
+    </div>
+
+    <div class="roles-grid">
+      @for (role of roleCards(); track role.id) {
+        <article class="role-card" [class]="accentClass(role.accent)">
+          <div class="role-card__top">
+            <div>
+              <span class="role-card__badge">{{ role.name }}</span>
+              <h4>{{ role.readableCount }} module(s) visibles</h4>
+            </div>
+            <strong>{{ role.writableCount }} avec action</strong>
+          </div>
+
+          <p>{{ role.description }}</p>
+
+          <div class="role-card__modules">
+            @for (module of role.highlights; track module) {
+              <span>{{ module }}</span>
+            }
+          </div>
+        </article>
+      }
+    </div>
+  </article>
+
+  @if (editorMode()) {
+    <div class="modal-backdrop" (click)="closeEditor()">
+      <aside class="user-drawer" (click)="$event.stopPropagation()">
+        <div class="user-drawer__header">
+          <div>
+            <p>{{ editorMode() === 'create' ? 'Nouveau compte' : 'Modification' }}</p>
+            <h3>
+              {{ editorMode() === 'create'
+                ? 'Créer un utilisateur'
+                : (editingUser()?.firstName || '') + ' ' + (editingUser()?.lastName || '') }}
+            </h3>
+          </div>
+          <button type="button" (click)="closeEditor()">×</button>
+        </div>
+
+        <div class="user-drawer__body">
+          @if (errors().length) {
+            <div class="form-alert">
+              <strong>Merci de corriger les points suivants :</strong>
+              <ul>
+                @for (error of errors(); track error) {
+                  <li>{{ error }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          <section class="form-section">
+            <div class="form-section__heading">
+              <p>Informations personnelles</p>
+              <small>Identité et contact du collaborateur</small>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                <span>Prénom</span>
+                <input
+                  type="text"
+                  [ngModel]="form().firstName"
+                  (ngModelChange)="updateForm('firstName', $event)"
+                  placeholder="Étienne"
+                />
+              </label>
+              <label>
+                <span>Nom</span>
+                <input
+                  type="text"
+                  [ngModel]="form().lastName"
+                  (ngModelChange)="updateForm('lastName', $event)"
+                  placeholder="Renard"
+                />
+              </label>
+              <label class="form-grid__full">
+                <span>Email</span>
+                <input
+                  type="email"
+                  [ngModel]="form().email"
+                  (ngModelChange)="updateForm('email', $event)"
+                  placeholder="e.renard@medicab.fr"
+                />
+              </label>
+              <label class="form-grid__full">
+                <span>Téléphone</span>
+                <input
+                  type="text"
+                  [ngModel]="form().phone"
+                  (ngModelChange)="updateForm('phone', $event)"
+                  placeholder="01 42 00 00 00"
+                />
+              </label>
+            </div>
+          </section>
+
+          <section class="form-section">
+            <div class="form-section__heading">
+              <p>Rôle & accès</p>
+              <small>Le rôle pilote la visibilité métier dans l'application</small>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                <span>Rôle</span>
+                <select [ngModel]="form().role" (ngModelChange)="updateForm('role', $event)">
+                  @for (role of roleOptions.slice(1); track role) {
+                    <option [value]="role">{{ role }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                <span>Statut</span>
+                <select [ngModel]="form().status" (ngModelChange)="updateForm('status', $event)">
+                  @for (status of statusOptions.slice(1); track status) {
+                    <option [value]="status">{{ status }}</option>
+                  }
+                </select>
+              </label>
+            </div>
+
+            @if (form().role === 'Médecin') {
+              <div class="form-grid">
+                <label>
+                  <span>Spécialité</span>
+                  <input
+                    type="text"
+                    [ngModel]="form().specialty"
+                    (ngModelChange)="updateForm('specialty', $event)"
+                    placeholder="Médecine générale"
+                  />
+                </label>
+                <label>
+                  <span>RPPS</span>
+                  <input
+                    type="text"
+                    [ngModel]="form().rpps"
+                    (ngModelChange)="updateForm('rpps', $event)"
+                    placeholder="10003456789"
+                  />
+                </label>
+              </div>
+            }
+          </section>
+
+          <section class="form-section">
+            <div class="form-section__heading">
+              <p>Sécurité</p>
+              <small>Mot de passe initial pour le provisionnement du compte</small>
+            </div>
+
+            <label class="form-grid__full">
+              <span>{{ editorMode() === 'create' ? 'Mot de passe initial' : 'Nouveau mot de passe (optionnel)' }}</span>
+              <input
+                type="password"
+                [ngModel]="form().password"
+                (ngModelChange)="updateForm('password', $event)"
+                placeholder="••••••••"
+              />
+            </label>
+          </section>
+        </div>
+
+        <div class="user-drawer__footer">
+          <button type="button" (click)="closeEditor()">Annuler</button>
+          <button type="button" class="user-drawer__submit" (click)="saveUser()">
+            {{ editorMode() === 'create' ? 'Créer le compte' : 'Enregistrer' }}
+          </button>
+        </div>
+      </aside>
+    </div>
+  }
+</section>

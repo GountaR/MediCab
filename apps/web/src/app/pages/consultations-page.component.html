@@ -1,0 +1,267 @@
+@if (consultation(); as selectedConsultation) {
+  <section class="consultations-page">
+    <article class="hero-card">
+      <div>
+        <p class="hero-card__eyebrow">Espace médecin · Consultation structurée</p>
+        <h2>On apporte le premier vrai écran clinique Angular, aligné avec le prototype médecin.</h2>
+        <p>
+          Cette vue se concentre sur le parcours du Dr. {{ medecinActif?.prenom }} {{ medecinActif?.nom }}, avec accès à ses
+          consultations signées, au contexte patient, aux diagnostics actifs et à l'ordonnance associée.
+        </p>
+      </div>
+
+      <div class="hero-card__aside">
+        <span>Règle métier</span>
+        <strong>{{ patientsSuivisCount }} patient(s) suivis</strong>
+        <small>Le médecin ne voit ici que ses patients déjà consultés, conformément au cadrage V1.</small>
+      </div>
+    </article>
+
+    <div class="summary-grid">
+      <article>
+        <p>Consultations du jour</p>
+        <strong>{{ consultationsDuJour }}</strong>
+        <span>Créneaux encore liés au médecin actif dans le mock planning.</span>
+      </article>
+      <article>
+        <p>Consultations disponibles</p>
+        <strong>{{ resume().consultationsDisponibles }}</strong>
+        <span>Historique clinique chargé pour le premier écran médecin.</span>
+      </article>
+      <article>
+        <p>Traitements actifs</p>
+        <strong>{{ resume().traitementsActifs }}</strong>
+        <span>Médicaments encore en cours pour le patient sélectionné.</span>
+      </article>
+    </div>
+
+    <article class="toolbar-card">
+      <label>
+        <span>Choisir une consultation</span>
+        <select [ngModel]="consultationId()" (ngModelChange)="consultationId.set($event)">
+          @for (item of consultationsDisponibles; track item.id) {
+            <option [value]="item.id">
+              {{ item.date }} · {{ getNomComplet(demoStore.getPatient(item.patientId)!) }} · {{ item.motif }}
+            </option>
+          }
+        </select>
+      </label>
+
+      <div class="toolbar-card__status">
+        <span>Statut courant</span>
+        <app-status-chip [tone]="consultationTone(selectedConsultation.statut)">{{ selectedConsultation.statut }}</app-status-chip>
+      </div>
+    </article>
+
+    <div class="content-grid">
+      <div class="content-grid__main">
+        <article class="panel">
+          <div class="panel__header">
+            <div>
+              <p>Motif et anamnèse</p>
+              <h3>{{ selectedConsultation.motif }}</h3>
+            </div>
+            <span>{{ selectedConsultation.date }} · {{ selectedConsultation.heure }}</span>
+          </div>
+          <p class="panel__text">{{ selectedConsultation.anamnese }}</p>
+        </article>
+
+        <article class="panel">
+          <div class="panel__header">
+            <div>
+              <p>Examen clinique</p>
+              <h3>Données observées et synthèse</h3>
+            </div>
+            @if (dernieresConstantes(); as constantes) {
+              <span>Dernier relevé : {{ constantes.date }}</span>
+            }
+          </div>
+
+          <div class="vitals-grid">
+            <article>
+              <span>Poids</span>
+              <strong>{{ selectedConsultation.examenClinique.poids ?? '—' }}</strong>
+              <small>kg</small>
+            </article>
+            <article>
+              <span>Taille</span>
+              <strong>{{ selectedConsultation.examenClinique.taille ?? '—' }}</strong>
+              <small>cm</small>
+            </article>
+            <article>
+              <span>PA</span>
+              <strong>{{ selectedConsultation.examenClinique.pa || '—' }}</strong>
+              <small>mmHg</small>
+            </article>
+            <article>
+              <span>FC</span>
+              <strong>{{ selectedConsultation.examenClinique.fc ?? '—' }}</strong>
+              <small>bpm</small>
+            </article>
+            <article>
+              <span>SpO2</span>
+              <strong>{{ selectedConsultation.examenClinique.spo2 ?? '—' }}</strong>
+              <small>%</small>
+            </article>
+            <article>
+              <span>IMC</span>
+              <strong>{{ imc() ?? '—' }}</strong>
+              <small>kg/m²</small>
+            </article>
+          </div>
+
+          <div class="clinical-notes">
+            <div>
+              <h4>Cardiovasculaire</h4>
+              <p>{{ selectedConsultation.examenClinique.cardiovasculaire || 'Non renseigné.' }}</p>
+            </div>
+            <div>
+              <h4>Respiratoire</h4>
+              <p>{{ selectedConsultation.examenClinique.respiratoire || 'Non renseigné.' }}</p>
+            </div>
+            <div>
+              <h4>Abdomen</h4>
+              <p>{{ selectedConsultation.examenClinique.abdomen || 'Non renseigné.' }}</p>
+            </div>
+            <div>
+              <h4>Neurologique</h4>
+              <p>{{ selectedConsultation.examenClinique.neurologique || 'Non renseigné.' }}</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel__header">
+            <div>
+              <p>Diagnostic</p>
+              <h3>{{ selectedConsultation.diagnosticPrincipal }}</h3>
+            </div>
+            <span>{{ diagnosticsActifs().length }} diagnostic(s) actif(s)</span>
+          </div>
+
+          <div class="tag-list">
+            @for (diagnostic of diagnosticsActifs(); track diagnostic.id) {
+              <app-status-chip [tone]="diagnosticTone(diagnostic)">{{ diagnostic.code }} · {{ diagnostic.libelle }}</app-status-chip>
+            }
+          </div>
+
+          @if (selectedConsultation.diagnosticsSecondaires.length) {
+            <div class="secondary-list">
+              <h4>Diagnostics secondaires</h4>
+              <ul>
+                @for (item of selectedConsultation.diagnosticsSecondaires; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            </div>
+          }
+
+          <div class="panel__text-block">
+            <h4>Évaluation clinique</h4>
+            <p>{{ selectedConsultation.evaluation }}</p>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel__header">
+            <div>
+              <p>Plan thérapeutique</p>
+              <h3>Décisions et prescription</h3>
+            </div>
+            @if (ordonnance(); as ord) {
+              <app-status-chip tone="accent">Ordonnance {{ ord.statut.toLowerCase() }}</app-status-chip>
+            }
+          </div>
+
+          <pre class="plan-block">{{ selectedConsultation.plan }}</pre>
+
+          @if (ordonnance(); as ord) {
+            <div class="prescription-list">
+              <h4>Ordonnance associée</h4>
+              @for (medicament of ord.medicaments; track medicament.id) {
+                <article>
+                  <strong>{{ medicament.dci }} {{ medicament.dosage }}</strong>
+                  <p>{{ medicament.posologie }} · {{ medicament.duree }} · {{ medicament.quantite }}</p>
+                </article>
+              }
+              @if (ord.instructions) {
+                <p class="prescription-list__instructions">{{ ord.instructions }}</p>
+              }
+            </div>
+          }
+        </article>
+
+        <article class="panel">
+          <div class="panel__header">
+            <div>
+              <p>Suivi</p>
+              <h3>Prochaine étape clinique</h3>
+            </div>
+            <span>{{ selectedConsultation.suiviDate || 'À planifier' }}</span>
+          </div>
+          <p class="panel__text">{{ selectedConsultation.suiviInstructions || 'Aucune consigne de suivi renseignée.' }}</p>
+        </article>
+      </div>
+
+      <aside class="content-grid__aside">
+        @if (patient(); as currentPatient) {
+          <article class="side-card">
+            <p class="side-card__eyebrow">Contexte patient</p>
+            <h3>{{ getNomComplet(currentPatient) }}</h3>
+            <div class="side-card__meta">
+              <span>{{ currentPatient.dpi }}</span>
+              <span>{{ currentPatient.dateNaissance }}</span>
+              <span>{{ currentPatient.groupeSanguin }}</span>
+            </div>
+
+            @if (currentPatient.allergies.length) {
+              <div class="alert-box">
+                <strong>Allergies</strong>
+                <p>{{ currentPatient.allergies.join(', ') }}</p>
+              </div>
+            }
+
+            @if (currentPatient.etiquettes?.length) {
+              <div class="tag-list tag-list--soft">
+                @for (tag of currentPatient.etiquettes; track tag) {
+                  <span>{{ tag }}</span>
+                }
+              </div>
+            }
+          </article>
+        }
+
+        <article class="side-card">
+          <p class="side-card__eyebrow">Historique récent</p>
+          <h3>Consultations du patient</h3>
+          <div class="history-list">
+            @for (item of historiquesPatient(); track item.id) {
+              <button type="button" (click)="consultationId.set(item.id)" [class.history-list__item--active]="item.id === selectedConsultation.id">
+                <strong>{{ item.date }} · {{ item.heure }}</strong>
+                <small>{{ item.motif }}</small>
+              </button>
+            }
+          </div>
+        </article>
+
+        <article class="side-card">
+          <p class="side-card__eyebrow">Traitements actifs</p>
+          <h3>{{ traitementsActifs().length }} ligne(s)</h3>
+          <div class="med-list">
+            @for (medicament of traitementsActifs(); track medicament.id) {
+              <div>
+                <strong>{{ medicament.dci }} {{ medicament.dosage }}</strong>
+                <small>{{ medicament.posologie }}</small>
+              </div>
+            }
+          </div>
+        </article>
+      </aside>
+    </div>
+  </section>
+} @else {
+  <section class="empty-state">
+    <h2>Aucune consultation médecin n'est encore disponible.</h2>
+    <p>Le prochain bloc du Sprint 3 devra enrichir le jeu clinique si nous voulons aller plus loin sur les écrans médecin.</p>
+  </section>
+}

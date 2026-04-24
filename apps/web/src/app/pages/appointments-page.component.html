@@ -1,0 +1,173 @@
+<section class="appointments-page">
+  <article class="hero-card">
+    <div>
+      <p class="hero-card__eyebrow">Réception · Rendez-vous</p>
+      <h2>Le planning du jour devient enfin exploitable dans Angular.</h2>
+      <p>
+        On reprend le coeur du prototype réceptionniste : vue liste, vue agenda, filtres par statut et médecin, puis
+        action rapide d'accueil patient sans attendre les APIs.
+      </p>
+    </div>
+
+    <div class="hero-card__aside">
+      <span>{{ referenceLabel() }}</span>
+      <strong>{{ vueSynthese().progression }}% terminés</strong>
+      <div class="hero-card__progress">
+        <div [style.width.%]="vueSynthese().progression"></div>
+      </div>
+      <small>{{ vueSynthese().termines }} rendez-vous terminés sur {{ vueSynthese().total }}</small>
+    </div>
+  </article>
+
+  <div class="summary-grid">
+    <article>
+      <p>Total du jour</p>
+      <strong>{{ vueSynthese().total }}</strong>
+      <span>Base de démonstration alignée sur le planning du prototype.</span>
+    </article>
+    <article>
+      <p>À accueillir / en cours</p>
+      <strong>{{ vueSynthese().enAccueil }}</strong>
+      <span>Patients déjà arrivés ou déjà passés en consultation.</span>
+    </article>
+    <article>
+      <p>Encore planifiés</p>
+      <strong>{{ vueSynthese().planifies }}</strong>
+      <span>Créneau restant à sécuriser côté réception.</span>
+    </article>
+  </div>
+
+  <article class="toolbar-card">
+    <div class="toolbar-card__filters">
+      <label>
+        <span>Recherche</span>
+        <input
+          type="search"
+          [ngModel]="recherche()"
+          (ngModelChange)="recherche.set($event)"
+          placeholder="Patient, type ou horaire"
+        />
+      </label>
+
+      <label>
+        <span>Statut</span>
+        <select [ngModel]="filtreStatut()" (ngModelChange)="filtreStatut.set($event)">
+          @for (statut of filtresStatut; track statut) {
+            <option [value]="statut">{{ statut }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Médecin</span>
+        <select [ngModel]="filtreMedecin()" (ngModelChange)="filtreMedecin.set($event)">
+          <option value="Tous">Tous les médecins</option>
+          @for (medecin of medecins(); track medecin.id) {
+            <option [value]="medecin.id">Dr. {{ medecin.prenom }} {{ medecin.nom }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="toolbar-card__actions">
+      <div class="view-toggle">
+        <button type="button" (click)="setVue('liste')" [class.view-toggle__button--active]="vue() === 'liste'">Liste</button>
+        <button type="button" (click)="setVue('agenda')" [class.view-toggle__button--active]="vue() === 'agenda'">Agenda</button>
+      </div>
+      <span>{{ rendezVousFiltres().length }} résultat(s)</span>
+    </div>
+  </article>
+
+  @if (vue() === 'liste') {
+    <article class="list-card">
+      <div class="list-card__header">
+        <p>Planning opérationnel</p>
+        <h3>Rendez-vous filtrés</h3>
+      </div>
+
+      @if (lignesListe().length) {
+        <div class="appointment-rows">
+          @for (row of lignesListe(); track row.rendezVous.id) {
+            <div class="appointment-row">
+              <div class="appointment-row__time">
+                <strong>{{ row.rendezVous.heure }}</strong>
+                <small>{{ row.rendezVous.duree }} min</small>
+              </div>
+
+              <div class="appointment-row__patient">
+                <div class="appointment-row__avatar" [style.background]="row.medecin?.couleur || '#1d5fa8'">
+                  {{ row.patient?.prenom?.[0] }}{{ row.patient?.nom?.[0] }}
+                </div>
+                <div>
+                  <a routerLink="/patients/{{ row.patient?.id }}">{{ row.patient ? row.patient.prenom + ' ' + row.patient.nom : 'Patient inconnu' }}</a>
+                  <small>{{ row.patient?.dpi }} · {{ row.rendezVous.type }}</small>
+                </div>
+              </div>
+
+              <div class="appointment-row__doctor">
+                <span>Médecin</span>
+                <strong>Dr. {{ row.medecin?.nom }}</strong>
+              </div>
+
+              <div class="appointment-row__status">
+                <app-status-chip [tone]="appointmentTone(row.rendezVous.statut)">{{ row.rendezVous.statut }}</app-status-chip>
+              </div>
+
+              <div class="appointment-row__actions">
+                @if (row.rendezVous.statut === 'Planifié') {
+                  <button type="button" (click)="accueillir(row.rendezVous.id)">Accueillir</button>
+                } @else {
+                  <a routerLink="/patients/{{ row.patient?.id }}">Voir dossier</a>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <h3>Aucun rendez-vous ne correspond à ces filtres.</h3>
+          <p>Essaie un autre médecin ou un autre statut pour retrouver le planning attendu.</p>
+        </div>
+      }
+    </article>
+  } @else {
+    <article class="agenda-card">
+      <div class="agenda-card__header">
+        <p>Vue agenda</p>
+        <h3>Timeline de la journée</h3>
+      </div>
+
+      <div class="agenda">
+        <div class="agenda__hours" [style.height]="agendaHeight">
+          @for (heure of heuresAgenda; track heure) {
+            <div class="agenda__hour" [style.height.px]="72">
+              <span>{{ heure.toString().padStart(2, '0') }}:00</span>
+            </div>
+          }
+        </div>
+
+        <div class="agenda__lane" [style.height]="agendaHeight">
+          @for (heure of heuresAgenda; track heure) {
+            <div class="agenda__line" [style.top.px]="(heure - 8) * 72"></div>
+          }
+
+          @for (bloc of blocsAgenda(); track bloc.rendezVous.id) {
+            <a
+              class="agenda__item"
+              routerLink="/patients/{{ bloc.patient?.id }}"
+              [style.top.px]="bloc.top"
+              [style.height.px]="bloc.height"
+              [style.borderColor]="bloc.medecin?.couleur || '#1d5fa8'"
+              [style.background]="agendaBackground(bloc.medecin?.couleur)"
+            >
+              <div class="agenda__item-bar" [style.background]="bloc.medecin?.couleur || '#1d5fa8'"></div>
+              <strong>{{ bloc.rendezVous.heure }} · {{ bloc.patient ? bloc.patient.prenom + ' ' + bloc.patient.nom : 'Patient inconnu' }}</strong>
+              <small>{{ bloc.rendezVous.type }} · Dr. {{ bloc.medecin?.nom }}</small>
+              <app-status-chip [tone]="appointmentTone(bloc.rendezVous.statut)">{{ bloc.rendezVous.statut }}</app-status-chip>
+            </a>
+          }
+        </div>
+      </div>
+    </article>
+  }
+</section>

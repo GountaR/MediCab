@@ -4,7 +4,7 @@
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 2fr minmax(18rem, 1fr);
+  grid-template-columns: minmax(0, 1.75fr) minmax(20rem, 1fr);
   gap: 1.2rem;
 }
 
@@ -18,8 +18,10 @@
   box-shadow: var(--mc-shadow-soft);
 }
 
-.hero-panel {
-  padding: 1.7rem;
+.hero-panel,
+.snapshot-card,
+.section-card {
+  padding: 1.5rem;
 }
 
 .hero-panel__eyebrow,
@@ -42,12 +44,12 @@
 }
 
 .hero-panel h2 {
-  max-width: 18ch;
+  max-width: 17ch;
   font-size: clamp(1.9rem, 3vw, 2.7rem);
 }
 
-.hero-panel__text {
-  max-width: 42rem;
+.hero-panel__text,
+.snapshot-card__text {
   margin: 1rem 0 0;
   color: #55687c;
   line-height: 1.7;
@@ -78,14 +80,33 @@
 }
 
 .snapshot-card {
-  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
 }
 
-.snapshot-card ul {
-  margin: 0.9rem 0 0;
-  padding-left: 1.15rem;
-  color: #56687c;
-  line-height: 1.7;
+.snapshot-card strong {
+  font-size: 1.8rem;
+  color: #10233b;
+}
+
+.snapshot-card__summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(16, 35, 59, 0.08);
+}
+
+.snapshot-card__summary span {
+  color: #637588;
+  font-size: 0.9rem;
+}
+
+.snapshot-card__summary strong {
+  font-size: 1.15rem;
 }
 
 .metrics {
@@ -96,7 +117,7 @@
 }
 
 .metric-card {
-  padding: 1.2rem;
+  padding: 1.15rem;
 }
 
 .metric-card__label,
@@ -124,8 +145,82 @@
   font-size: 0.87rem;
 }
 
-.section-card {
-  padding: 1.4rem;
+.section-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.section-card--full {
+  grid-column: 1 / -1;
+}
+
+.appointment-list,
+.watchlist,
+.module-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.appointment-item,
+.watchlist-item,
+.module-link,
+.role-grid article {
+  border-radius: 1rem;
+  background: rgba(16, 35, 59, 0.04);
+  border: 1px solid rgba(10, 34, 58, 0.06);
+}
+
+.appointment-item,
+.watchlist-item,
+.module-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.appointment-item strong,
+.watchlist-item strong,
+.module-link strong,
+.role-grid h4,
+.module-column h4 {
+  margin: 0;
+  color: #10233b;
+}
+
+.appointment-item small,
+.watchlist-item small,
+.module-link small,
+.role-grid p {
+  display: block;
+  margin-top: 0.28rem;
+  color: #607387;
+  line-height: 1.45;
+}
+
+.appointment-item__time {
+  display: inline-flex;
+  margin-bottom: 0.32rem;
+  color: #1d5fa8;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.watchlist-item__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  color: #10233b;
+  font-weight: 700;
 }
 
 .role-grid {
@@ -135,38 +230,8 @@
   margin-top: 1rem;
 }
 
-.role-grid article,
-.module-link {
-  border-radius: 1rem;
-  background: rgba(16, 35, 59, 0.04);
-  border: 1px solid rgba(10, 34, 58, 0.06);
-}
-
 .role-grid article {
   padding: 1rem;
-}
-
-.role-grid h4,
-.role-grid p,
-.module-link strong,
-.module-link small,
-.module-column h4 {
-  margin: 0;
-}
-
-.role-grid h4,
-.module-column h4 {
-  color: #10233b;
-}
-
-.role-grid p {
-  margin-top: 0.35rem;
-  color: #5d7185;
-  line-height: 1.55;
-}
-
-.section-card--full {
-  grid-column: 1 / -1;
 }
 
 .module-columns {
@@ -182,19 +247,8 @@
   gap: 0.8rem;
 }
 
-.module-links {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
 .module-link {
-  display: flex;
-  gap: 0.85rem;
   align-items: flex-start;
-  padding: 0.95rem;
-  color: inherit;
-  text-decoration: none;
 }
 
 .module-link__icon {
@@ -208,28 +262,30 @@
   flex-shrink: 0;
 }
 
-.module-link small {
-  display: block;
-  margin-top: 0.28rem;
-  color: #607387;
-  line-height: 1.45;
-}
-
-@media (max-width: 980px) {
+@media (max-width: 1080px) {
   .dashboard-grid,
   .module-columns {
     grid-template-columns: 1fr;
   }
 
-  .metrics,
-  .role-grid {
-    grid-template-columns: 1fr 1fr;
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 640px) {
-  .metrics,
-  .role-grid {
+@media (max-width: 760px) {
+  .role-grid,
+  .metrics {
     grid-template-columns: 1fr;
+  }
+
+  .appointment-item,
+  .watchlist-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .watchlist-item__meta {
+    align-items: flex-start;
   }
 }

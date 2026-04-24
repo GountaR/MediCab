@@ -1,0 +1,269 @@
+:host {
+  display: block;
+}
+
+.detail-page {
+  display: grid;
+  gap: 1.1rem;
+}
+
+.detail-topbar,
+.hero-card,
+.alert-card,
+.info-card,
+.panel,
+.not-found-card {
+  border-radius: 1.35rem;
+  border: 1px solid rgba(10, 34, 58, 0.08);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--mc-shadow-soft);
+}
+
+.detail-topbar,
+.hero-card,
+.alert-card,
+.panel,
+.not-found-card {
+  padding: 1.2rem 1.35rem;
+}
+
+.detail-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.detail-topbar a,
+.detail-topbar__actions a,
+.not-found-card a {
+  color: #1d5fa8;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.detail-topbar__actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.hero-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.hero-card__identity {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.hero-card__avatar {
+  display: grid;
+  place-items: center;
+  width: 4.2rem;
+  height: 4.2rem;
+  border-radius: 50%;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.hero-card__eyebrow,
+.panel__header p,
+.info-card p,
+.not-found-card p {
+  margin: 0;
+  color: #1d5fa8;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.hero-card h2,
+.panel__header h3,
+.not-found-card h2 {
+  margin: 0.4rem 0 0;
+  color: #10233b;
+  font-family: var(--mc-heading-font);
+  letter-spacing: -0.04em;
+}
+
+.hero-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.55rem;
+  color: #5f7184;
+  font-size: 0.92rem;
+}
+
+.hero-card__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+}
+
+.hero-card__referent {
+  min-width: 15rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(16, 35, 59, 0.04);
+}
+
+.hero-card__referent span,
+.hero-card__referent small {
+  display: block;
+  color: #5d7184;
+}
+
+.hero-card__referent strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: #10233b;
+}
+
+.alert-card {
+  border-color: rgba(220, 38, 38, 0.12);
+  background: rgba(220, 38, 38, 0.06);
+}
+
+.alert-card strong,
+.alert-card p {
+  margin: 0;
+  color: #a22f2f;
+}
+
+.alert-card p {
+  margin-top: 0.35rem;
+  line-height: 1.55;
+}
+
+.overview-grid,
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.content-grid {
+  grid-template-columns: 1.3fr 1fr;
+}
+
+.info-card {
+  padding: 1.15rem;
+}
+
+.info-card dl {
+  display: grid;
+  gap: 0.9rem;
+  margin: 1rem 0 0;
+}
+
+.info-card dt {
+  color: #627487;
+  font-size: 0.82rem;
+}
+
+.info-card dd {
+  margin: 0.28rem 0 0;
+  color: #10233b;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.panel__header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.panel__header span {
+  color: #627487;
+  font-size: 0.86rem;
+}
+
+.list-stack {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.list-row,
+.empty-card {
+  border-radius: 1rem;
+  border: 1px solid rgba(10, 34, 58, 0.06);
+  background: rgba(16, 35, 59, 0.03);
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+}
+
+.list-row strong,
+.empty-card strong {
+  color: #10233b;
+}
+
+.list-row small,
+.empty-card p {
+  display: block;
+  margin-top: 0.28rem;
+  color: #607387;
+  line-height: 1.45;
+}
+
+.list-row__invoice-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  color: #10233b;
+  font-weight: 700;
+}
+
+.empty-card {
+  padding: 1rem;
+}
+
+.not-found-card {
+  display: grid;
+  place-items: center;
+  gap: 0.7rem;
+  text-align: center;
+}
+
+@media (max-width: 1080px) {
+  .hero-card,
+  .overview-grid,
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .detail-topbar,
+  .list-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-topbar__actions,
+  .hero-card__identity,
+  .hero-card__chips {
+    flex-wrap: wrap;
+  }
+
+  .list-row__invoice-meta {
+    align-items: flex-start;
+  }
+}

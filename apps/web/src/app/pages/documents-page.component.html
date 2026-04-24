@@ -1,0 +1,101 @@
+<section class="documents-page">
+  <article class="hero-card">
+    <div>
+      <p class="hero-card__eyebrow">Documents patient</p>
+      <h2>Le Sprint 3 couvre aussi la lecture documentaire et les pièces cliniques clés.</h2>
+      <p>
+        Ce module reprend l'esprit du prototype : recherche rapide, catégories, statuts documentaires et accès direct au
+        dossier patient lié.
+      </p>
+    </div>
+
+    <div class="hero-card__aside">
+      <span>Documents visibles</span>
+      <strong>{{ stats().total }}</strong>
+      <small>{{ stats().anormaux }} anormal(aux) ou critique(s) · {{ stats().enAttente }} en attente</small>
+    </div>
+  </article>
+
+  <div class="summary-grid">
+    <article>
+      <p>Anormaux / critiques</p>
+      <strong>{{ stats().anormaux }}</strong>
+      <span>À mettre en avant dans la lecture médecin.</span>
+    </article>
+    <article>
+      <p>En attente</p>
+      <strong>{{ stats().enAttente }}</strong>
+      <span>Résultats encore attendus ou non intégrés.</span>
+    </article>
+    <article>
+      <p>Couverture</p>
+      <strong>{{ categories.length - 1 }}</strong>
+      <span>Catégories métier déjà présentes dans le mock clinique.</span>
+    </article>
+  </div>
+
+  <article class="toolbar-card">
+    <label class="toolbar-card__search">
+      <span>Recherche</span>
+      <input type="search" [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Document, patient, précision" />
+    </label>
+
+    <div class="toolbar-card__filters">
+      @for (category of categories; track category) {
+        <button type="button" [class.toolbar-card__filter--active]="categoryFilter() === category" (click)="categoryFilter.set(category)">
+          {{ category }}
+        </button>
+      }
+    </div>
+  </article>
+
+  <article class="table-card">
+    @if (filtered().length) {
+      <div class="document-rows">
+        @for (document of filtered(); track document.id) {
+          <div class="document-row">
+            <div>
+              <strong>{{ document.titre }}</strong>
+              <small>{{ document.sousTitre || document.type }}</small>
+            </div>
+
+            <div>
+              <span>Patient</span>
+              <a routerLink="/patients/{{ document.patientId }}">{{ getNomComplet(demoStore.getPatient(document.patientId)!) }}</a>
+            </div>
+
+            <div>
+              <span>Catégorie</span>
+              <app-status-chip [tone]="categoryTone(document.type)">{{ document.type }}</app-status-chip>
+            </div>
+
+            <div>
+              <span>Date</span>
+              <strong>{{ document.date }}</strong>
+            </div>
+
+            <div>
+              <span>Taille</span>
+              <strong>{{ document.taille }}</strong>
+            </div>
+
+            <div>
+              <span>Statut</span>
+              <app-status-chip [tone]="documentTone(document.statut)">{{ document.statut }}</app-status-chip>
+            </div>
+
+            <div class="document-row__summary">
+              <span>Résumé</span>
+              <p>{{ document.resume || 'Aucun résumé disponible pour ce document.' }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <h3>Aucun document ne correspond à ces filtres.</h3>
+        <p>Réduis la recherche ou change de catégorie pour faire réapparaître les pièces du dossier.</p>
+      </div>
+    }
+  </article>
+</section>

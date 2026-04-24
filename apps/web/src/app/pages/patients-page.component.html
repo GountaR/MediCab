@@ -1,0 +1,148 @@
+<section class="patients-page">
+  <article class="hero-card">
+    <div>
+      <p class="hero-card__eyebrow">Réception · Liste patients</p>
+      <h2>Une vue dense, filtrable et directement alignée sur le prototype Figma.</h2>
+      <p>
+        Recherche par nom, DPI, téléphone ou e-mail, filtres par statut et médecin référent, puis accès direct à la
+        fiche patient. La séparation entre accueil et clinique reste préparée pour la suite.
+      </p>
+    </div>
+
+    <div class="hero-card__stats">
+      <div>
+        <span>Patients visibles</span>
+        <strong>{{ vueSynthese().total }}</strong>
+      </div>
+      <div>
+        <span>Avec impayé</span>
+        <strong>{{ vueSynthese().avecImpayes }}</strong>
+      </div>
+    </div>
+  </article>
+
+  <div class="summary-grid">
+    <article>
+      <p>Actifs</p>
+      <strong>{{ vueSynthese().actifs }}</strong>
+      <span>Patients opérationnels dans la base de démonstration.</span>
+    </article>
+    <article>
+      <p>En attente</p>
+      <strong>{{ vueSynthese().enAttente }}</strong>
+      <span>Nouveaux dossiers ou informations encore incomplètes.</span>
+    </article>
+    <article>
+      <p>Filtres actifs</p>
+      <strong>{{ filtreStatut() === 'Tous' && filtreMedecin() === 'Tous' && !recherche() ? '0' : '1+' }}</strong>
+      <span>Recherche instantanée et filtres réinitialisables.</span>
+    </article>
+  </div>
+
+  <article class="filter-card">
+    <div class="filter-card__controls">
+      <label class="search-field">
+        <span>Recherche</span>
+        <input
+          type="search"
+          [ngModel]="recherche()"
+          (ngModelChange)="recherche.set($event); setPage(1)"
+          placeholder="Nom, DPI, téléphone ou e-mail"
+        />
+      </label>
+
+      <label>
+        <span>Statut</span>
+        <select [ngModel]="filtreStatut()" (ngModelChange)="filtreStatut.set($event); setPage(1)">
+          @for (statut of statuts; track statut) {
+            <option [value]="statut">{{ statut }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        <span>Médecin référent</span>
+        <select [ngModel]="filtreMedecin()" (ngModelChange)="filtreMedecin.set($event); setPage(1)">
+          <option value="Tous">Tous</option>
+          @for (medecin of medecins(); track medecin.id) {
+            <option [value]="medecin.id">Dr. {{ medecin.prenom }} {{ medecin.nom }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <button type="button" class="filter-card__reset" (click)="resetFilters()">Réinitialiser</button>
+  </article>
+
+  <article class="list-card">
+    <div class="list-card__header">
+      <div>
+        <p>Patients</p>
+        <h3>{{ patientsFiltres().length }} résultat(s)</h3>
+      </div>
+      <span>10 lignes par page</span>
+    </div>
+
+    @if (pageCourante().length) {
+      <div class="patient-rows">
+        @for (row of pageCourante(); track row.patient.id) {
+          <a class="patient-row" routerLink="/patients/{{ row.patient.id }}">
+            <div class="patient-row__identity">
+              <div class="patient-row__avatar" [style.background]="row.medecin?.couleur || '#1d5fa8'">
+                {{ row.patient.prenom[0] }}{{ row.patient.nom[0] }}
+              </div>
+              <div>
+                <div class="patient-row__headline">
+                  <strong>{{ row.nomComplet }}</strong>
+                  <app-status-chip [tone]="patientTone(row.patient.statut)">{{ row.patient.statut }}</app-status-chip>
+                  @if (hasAlerte(row.patient)) {
+                    <span class="patient-row__flag">Alerte</span>
+                  }
+                </div>
+                <small>{{ row.patient.dpi }} · {{ row.age }} ans · {{ row.patient.telephone }}</small>
+                @if (row.patient.etiquettes?.length) {
+                  <div class="patient-row__tags">
+                    @for (etiquette of row.patient.etiquettes; track etiquette) {
+                      <span>{{ etiquette }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="patient-row__meta">
+              <div>
+                <span>Médecin référent</span>
+                <strong>Dr. {{ row.medecin?.nom || 'Non affecté' }}</strong>
+              </div>
+              <div>
+                <span>Dernière visite</span>
+                <strong>{{ row.patient.dernierVisite || 'Aucune' }}</strong>
+              </div>
+              <div>
+                <span>Prochain RDV</span>
+                <strong>{{ row.patient.prochainRDV || 'Non planifié' }}</strong>
+              </div>
+              <div>
+                <span>Solde impayé</span>
+                <strong [class.patient-row__debt]="(row.patient.soldeImpaye ?? 0) > 0">{{ row.solde }}</strong>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+
+      <div class="pagination">
+        <button type="button" (click)="setPage(page() - 1)" [disabled]="page() === 1">Précédent</button>
+        <span>Page {{ page() }} / {{ totalPages() }}</span>
+        <button type="button" (click)="setPage(page() + 1)" [disabled]="page() === totalPages()">Suivant</button>
+      </div>
+    } @else {
+      <div class="empty-state">
+        <h3>Aucun patient ne correspond à ces filtres.</h3>
+        <p>Réinitialise la recherche ou élargis les critères pour retrouver un dossier.</p>
+        <button type="button" (click)="resetFilters()">Tout réafficher</button>
+      </div>
+    }
+  </article>
+</section>

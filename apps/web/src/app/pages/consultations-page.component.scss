@@ -1,0 +1,355 @@
+:host {
+  display: block;
+}
+
+.consultations-page {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.hero-card,
+.summary-grid article,
+.toolbar-card,
+.panel,
+.side-card,
+.empty-state {
+  border-radius: 1.35rem;
+  border: 1px solid rgba(10, 34, 58, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--mc-shadow-soft);
+}
+
+.hero-card,
+.toolbar-card,
+.panel,
+.side-card,
+.empty-state {
+  padding: 1.25rem;
+}
+
+.hero-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.hero-card__eyebrow,
+.side-card__eyebrow,
+.panel__header p {
+  margin: 0;
+  color: #1d5fa8;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.hero-card h2,
+.side-card h3,
+.panel__header h3,
+.empty-state h2 {
+  margin: 0.45rem 0 0;
+  color: #10233b;
+  font-family: var(--mc-heading-font);
+  letter-spacing: -0.04em;
+}
+
+.hero-card h2 {
+  max-width: 19ch;
+  font-size: clamp(1.75rem, 3vw, 2.45rem);
+}
+
+.hero-card p:not(.hero-card__eyebrow) {
+  margin: 1rem 0 0;
+  max-width: 49rem;
+  color: #57697c;
+  line-height: 1.65;
+}
+
+.hero-card__aside {
+  min-width: 17rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(16, 35, 59, 0.04);
+}
+
+.hero-card__aside span,
+.hero-card__aside small,
+.side-card__meta span,
+.vitals-grid span,
+.vitals-grid small,
+.panel__header span,
+.history-list button small,
+.med-list small {
+  display: block;
+  color: #627487;
+}
+
+.hero-card__aside strong,
+.summary-grid strong,
+.vitals-grid strong,
+.panel__header app-status-chip,
+.history-list button strong,
+.med-list strong {
+  display: block;
+  margin-top: 0.35rem;
+}
+
+.hero-card__aside strong,
+.summary-grid strong {
+  color: #10233b;
+  font-size: 1.7rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.summary-grid article {
+  padding: 1rem;
+}
+
+.summary-grid p {
+  margin: 0;
+  color: #627487;
+  font-size: 0.82rem;
+}
+
+.summary-grid span {
+  display: block;
+  margin-top: 0.45rem;
+  color: #627487;
+  line-height: 1.5;
+}
+
+.toolbar-card {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.toolbar-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;
+}
+
+.toolbar-card span {
+  color: #4d6276;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.toolbar-card select {
+  min-height: 3rem;
+  border-radius: 0.95rem;
+  border: 1px solid rgba(16, 35, 59, 0.12);
+  background: white;
+  padding: 0.82rem 0.95rem;
+  color: #10233b;
+}
+
+.toolbar-card__status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 0.95fr);
+  gap: 1rem;
+}
+
+.content-grid__main,
+.content-grid__aside {
+  display: grid;
+  gap: 1rem;
+}
+
+.panel__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.panel__text,
+.panel__text-block p,
+.clinical-notes p,
+.plan-block,
+.prescription-list article p,
+.alert-box p,
+.empty-state p {
+  margin: 0.9rem 0 0;
+  color: #52687d;
+  line-height: 1.65;
+}
+
+.vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.vitals-grid article,
+.history-list button,
+.med-list div {
+  border-radius: 1rem;
+  border: 1px solid rgba(10, 34, 58, 0.06);
+  background: rgba(16, 35, 59, 0.03);
+}
+
+.vitals-grid article {
+  padding: 0.9rem;
+}
+
+.vitals-grid strong {
+  color: #10233b;
+  font-size: 1.25rem;
+}
+
+.clinical-notes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+
+.clinical-notes div,
+.panel__text-block,
+.prescription-list,
+.alert-box {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(16, 35, 59, 0.04);
+}
+
+.clinical-notes h4,
+.secondary-list h4,
+.panel__text-block h4,
+.prescription-list h4 {
+  margin: 0;
+  color: #10233b;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.tag-list--soft span {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.34rem 0.65rem;
+  background: rgba(16, 35, 59, 0.06);
+  color: #5d7184;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.secondary-list ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1.2rem;
+  color: #52687d;
+}
+
+.plan-block {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(16, 35, 59, 0.04);
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+.prescription-list {
+  margin-top: 1rem;
+}
+
+.prescription-list article + article {
+  margin-top: 0.85rem;
+}
+
+.prescription-list article strong,
+.side-card h3,
+.history-list button strong,
+.med-list strong {
+  color: #10233b;
+}
+
+.prescription-list__instructions {
+  margin-top: 1rem;
+  color: #1d5fa8;
+  font-weight: 700;
+}
+
+.side-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 0.65rem;
+}
+
+.alert-box {
+  margin-top: 1rem;
+  background: rgba(220, 38, 38, 0.08);
+}
+
+.alert-box strong,
+.alert-box p {
+  color: #a22f2f;
+}
+
+.history-list,
+.med-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.history-list button,
+.med-list div {
+  padding: 0.9rem;
+  text-align: left;
+}
+
+.history-list button {
+  border-width: 1px;
+}
+
+.history-list__item--active {
+  border-color: rgba(29, 95, 168, 0.2) !important;
+  background: rgba(29, 95, 168, 0.08) !important;
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  gap: 0.7rem;
+  text-align: center;
+}
+
+@media (max-width: 1180px) {
+  .hero-card,
+  .toolbar-card,
+  .content-grid,
+  .summary-grid,
+  .vitals-grid,
+  .clinical-notes {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .hero-card,
+  .toolbar-card {
+    align-items: stretch;
+  }
+}

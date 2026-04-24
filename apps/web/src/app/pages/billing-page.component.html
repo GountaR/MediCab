@@ -1,0 +1,205 @@
+<section class="billing-page">
+  <article class="hero-card">
+    <div>
+      <p class="hero-card__eyebrow">Facturation · V1 simplifiée</p>
+      <h2>On intègre la facturation du prototype tout en gardant notre règle métier V1.</h2>
+      <p>
+        La vue met l'accent sur les montants, le restant dû, les retards et l'encaissement simple. Aucun moyen de paiement
+        détaillé n'est stocké ici, conformément au cadrage produit.
+      </p>
+    </div>
+
+    <div class="hero-card__aside">
+      <span>Total ouvert</span>
+      <strong>{{ synthese().totalOuvert }}</strong>
+      <small>{{ boutonsFiltre()[0].count }} facture(s) encore non réglée(s)</small>
+    </div>
+  </article>
+
+  <div class="summary-grid">
+    <article class="summary-grid__card summary-grid__card--danger">
+      <p>En retard</p>
+      <strong>{{ synthese().totalRetard }}</strong>
+      <span>{{ synthese().enRetard.length }} facture(s) à relancer.</span>
+    </article>
+    <article class="summary-grid__card">
+      <p>Partielles</p>
+      <strong>{{ synthese().totalPartiel }}</strong>
+      <span>{{ synthese().partielles.length }} facture(s) encore incomplètes.</span>
+    </article>
+    <article class="summary-grid__card">
+      <p>Réglé</p>
+      <strong>{{ synthese().totalRegle }}</strong>
+      <span>Montant total déjà encaissé sur le mock actuel.</span>
+    </article>
+  </div>
+
+  @if (synthese().enRetard.length) {
+    <article class="alert-card">
+      <div>
+        <strong>{{ synthese().enRetard.length }} facture(s) sont en retard</strong>
+        <p>Le total à relancer s'élève à {{ synthese().totalRetard }}. Cette alerte reste volontairement très visible côté réception/admin.</p>
+      </div>
+      <button type="button" (click)="filtre.set('En retard')">Voir les retards</button>
+    </article>
+  }
+
+  <article class="toolbar-card">
+    <div class="toolbar-card__search">
+      <label>
+        <span>Recherche</span>
+        <input
+          type="search"
+          [ngModel]="recherche()"
+          (ngModelChange)="recherche.set($event)"
+          placeholder="Patient, numéro ou motif"
+        />
+      </label>
+    </div>
+
+    <div class="toolbar-card__filters">
+      @for (filtreOption of boutonsFiltre(); track filtreOption.key) {
+        <button
+          type="button"
+          [class.toolbar-card__filter--active]="filtre() === filtreOption.key"
+          [class.toolbar-card__filter--urgent]="filtreOption.urgent && filtre() !== filtreOption.key"
+          (click)="filtre.set(filtreOption.key)"
+        >
+          {{ filtreOption.label }}
+          <span>{{ filtreOption.count }}</span>
+        </button>
+      }
+    </div>
+  </article>
+
+  <article class="list-card">
+    <div class="list-card__header">
+      <p>Suivi des factures</p>
+      <h3>{{ lignes().length }} résultat(s)</h3>
+    </div>
+
+    @if (lignes().length) {
+      <div class="invoice-rows">
+        @for (row of lignes(); track row.facture.id) {
+          <div class="invoice-row" [class.invoice-row--late]="row.facture.statut === 'En retard'">
+            <div>
+              <strong>{{ row.facture.numero }}</strong>
+              <small>{{ row.facture.motif }}</small>
+            </div>
+
+            <div>
+              <span>Patient</span>
+              <a routerLink="/patients/{{ row.patient?.id }}">{{ row.patient ? row.patient.prenom + ' ' + row.patient.nom : 'Patient inconnu' }}</a>
+            </div>
+
+            <div>
+              <span>Émission</span>
+              <strong>{{ row.facture.date }}</strong>
+            </div>
+
+            <div>
+              <span>Échéance</span>
+              <strong>{{ row.facture.echeance }}</strong>
+              @if (row.facture.joursRetard) {
+                <small>{{ row.facture.joursRetard }} jour(s) de retard</small>
+              }
+            </div>
+
+            <div>
+              <span>Total / payé</span>
+              <strong>{{ formatMontant(row.facture.montantTotal) }}</strong>
+              <small>{{ formatMontant(row.facture.montantRegle) }} encaissé(s)</small>
+            </div>
+
+            <div>
+              <span>Restant dû</span>
+              <strong [class.invoice-row__remaining--late]="row.restant > 0 && row.facture.statut === 'En retard'">
+                {{ formatMontant(row.restant) }}
+              </strong>
+            </div>
+
+            <div class="invoice-row__status">
+              <app-status-chip [tone]="factureTone(row.facture.statut)">{{ row.facture.statut }}</app-status-chip>
+            </div>
+
+            <div class="invoice-row__actions">
+              @if (row.restant > 0 && row.facture.statut !== 'Annulée') {
+                <button type="button" (click)="ouvrirPaiement(row.facture)">Encaisser</button>
+              } @else {
+                <span>Soldée</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <h3>Aucune facture ne correspond au filtre actuel.</h3>
+        <p>Essaie un autre statut ou élargis la recherche pour retrouver les lignes attendues.</p>
+      </div>
+    }
+  </article>
+
+  @if (factureSelectionnee(); as facture) {
+    <div class="modal-backdrop" (click)="fermerPaiement()">
+      <div class="payment-modal" (click)="$event.stopPropagation()">
+        <div class="payment-modal__header">
+          <div>
+            <p>Encaissement simple</p>
+            <h3>{{ facture.numero }}</h3>
+          </div>
+          <button type="button" (click)="fermerPaiement()">×</button>
+        </div>
+
+        <div class="payment-modal__body">
+          <div class="payment-modal__summary">
+            <div>
+              <span>Patient</span>
+              <strong>{{ demoStore.getPatient(facture.patientId) ? demoStore.getPatient(facture.patientId)?.prenom + ' ' + demoStore.getPatient(facture.patientId)?.nom : 'Inconnu' }}</strong>
+            </div>
+            <div>
+              <span>Total facturé</span>
+              <strong>{{ formatMontant(facture.montantTotal) }}</strong>
+            </div>
+            <div>
+              <span>Déjà payé</span>
+              <strong>{{ formatMontant(facture.montantRegle) }}</strong>
+            </div>
+            <div>
+              <span>Reste à payer</span>
+              <strong>{{ formatMontant(facture.montantTotal - facture.montantRegle) }}</strong>
+            </div>
+          </div>
+
+          <label class="payment-modal__field">
+            <span>Montant encaissé</span>
+            <input
+              type="text"
+              [ngModel]="montantPaiement()"
+              (ngModelChange)="montantPaiement.set($event); erreurPaiement.set('')"
+              placeholder="0,00"
+            />
+          </label>
+
+          @if (erreurPaiement()) {
+            <p class="payment-modal__error">{{ erreurPaiement() }}</p>
+          }
+
+          <button type="button" class="payment-modal__fill" (click)="renseignerTotalRestant()">
+            Renseigner le montant total restant
+          </button>
+
+          <div class="payment-modal__note">
+            <strong>Rappel V1</strong>
+            <p>On ne capture pas le moyen de paiement dans MediCab V1. On enregistre uniquement le montant payé et on met à jour le statut.</p>
+          </div>
+        </div>
+
+        <div class="payment-modal__footer">
+          <button type="button" (click)="fermerPaiement()">Annuler</button>
+          <button type="button" class="payment-modal__confirm" (click)="validerPaiement()">Valider l'encaissement</button>
+        </div>
+      </div>
+    </div>
+  }
+</section>
