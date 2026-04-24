@@ -1,1 +1,47 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --mc-bg: #eef4f8;
+  --mc-surface: rgba(255, 255, 255, 0.88);
+  --mc-surface-strong: #ffffff;
+  --mc-text: #10233b;
+  --mc-text-soft: #55687c;
+  --mc-muted: #8a9baa;
+  --mc-border: rgba(10, 34, 58, 0.08);
+  --mc-primary: #1d5fa8;
+  --mc-primary-strong: #154b84;
+  --mc-secondary: #0f766e;
+  --mc-sidebar: #0c1d35;
+  --mc-heading-font: 'Fraunces', 'Times New Roman', serif;
+  --mc-body-font: 'IBM Plex Sans', 'Helvetica Neue', sans-serif;
+  --mc-shadow-soft: 0 22px 50px rgba(10, 34, 58, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--mc-bg);
+  color: var(--mc-text);
+  font-family: var(--mc-body-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}

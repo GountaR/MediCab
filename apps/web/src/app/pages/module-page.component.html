@@ -1,0 +1,44 @@
+<section class="module-page">
+  <div class="module-page__hero">
+    <div>
+      <p class="module-page__eyebrow">{{ page().eyebrow }}</p>
+      <h2>{{ page().description }}</h2>
+    </div>
+
+    <div class="module-page__hero-card">
+      <span>Statut</span>
+      <strong>Socle pret</strong>
+      <p>Le shell et la navigation sont en place. Le detail Figma sera integre au Sprint 3.</p>
+    </div>
+  </div>
+
+  <div class="module-page__metrics">
+    @for (card of page().summaryCards; track card.label) {
+      <article>
+        <p>{{ card.label }}</p>
+        <strong>{{ card.value }}</strong>
+        <span>{{ card.detail }}</span>
+      </article>
+    }
+  </div>
+
+  <div class="module-page__columns">
+    <article class="panel">
+      <p class="panel__eyebrow">Ce que cette vue couvrira</p>
+      <ul>
+        @for (item of page().focusItems; track item) {
+          <li>{{ item }}</li>
+        }
+      </ul>
+    </article>
+
+    <article class="panel">
+      <p class="panel__eyebrow">Etapes suivantes</p>
+      <ol>
+        @for (item of page().nextMilestones; track item) {
+          <li>{{ item }}</li>
+        }
+      </ol>
+    </article>
+  </div>
+</section>

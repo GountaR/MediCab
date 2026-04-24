@@ -1,0 +1,162 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 28rem);
+  gap: 2rem;
+  padding: 2rem;
+  background:
+    radial-gradient(circle at top left, rgba(29, 95, 168, 0.18), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(15, 118, 110, 0.14), transparent 25%),
+    linear-gradient(180deg, #eaf1f6 0%, #f7fbfd 100%);
+}
+
+.login-page__intro,
+.login-card {
+  border-radius: 1.7rem;
+  border: 1px solid rgba(10, 34, 58, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--mc-shadow-soft);
+}
+
+.login-page__intro {
+  padding: 2.4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.login-page__eyebrow {
+  margin: 0;
+  color: #1d5fa8;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.login-page h1 {
+  max-width: 14ch;
+  margin: 0.9rem 0 0;
+  color: #10233b;
+  font-family: var(--mc-heading-font);
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 0.94;
+}
+
+.login-page__text {
+  max-width: 36rem;
+  margin: 1.2rem 0 0;
+  color: #53677a;
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.login-page__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 2rem;
+}
+
+.login-page__chips span {
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(16, 35, 59, 0.06);
+  color: #153350;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.login-card {
+  padding: 1.7rem;
+}
+
+.login-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.login-card__mark {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #1d5fa8 0%, #0f766e 100%);
+  color: white;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.login-card__title,
+.login-card__subtitle {
+  margin: 0;
+}
+
+.login-card__title {
+  color: #10233b;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.login-card__subtitle {
+  margin-top: 0.2rem;
+  color: #6f8192;
+  font-size: 0.86rem;
+}
+
+.login-card__roles {
+  display: grid;
+  gap: 0.8rem;
+  margin: 1.6rem 0 1.5rem;
+}
+
+.login-card__roles article {
+  padding: 1rem;
+  border-radius: 1.15rem;
+  background: rgba(16, 35, 59, 0.04);
+  border: 1px solid rgba(10, 34, 58, 0.06);
+}
+
+.login-card__roles h2,
+.login-card__roles p {
+  margin: 0;
+}
+
+.login-card__roles h2 {
+  color: #10233b;
+  font-size: 0.98rem;
+}
+
+.login-card__roles p {
+  margin-top: 0.32rem;
+  color: #5d7185;
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+.login-card__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.95rem 1.1rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #1d5fa8 0%, #154b84 100%);
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 960px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+}

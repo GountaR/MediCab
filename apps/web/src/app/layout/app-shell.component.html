@@ -1,0 +1,87 @@
+<div class="shell">
+  <aside class="shell__sidebar">
+    <a class="brand" routerLink="/tableau-de-bord">
+      <div class="brand__mark">MC</div>
+      <div class="brand__copy">
+        <span class="brand__name">MediCab</span>
+        <span class="brand__sub">Cabinet medical · V1</span>
+      </div>
+    </a>
+
+    <nav class="sidebar-nav" aria-label="Navigation principale">
+      @for (section of sections; track section.key) {
+        <div class="sidebar-nav__section">
+          <p class="sidebar-nav__label">{{ section.label }}</p>
+          <div class="sidebar-nav__items">
+            @for (page of pagesForSection(section.key); track page.path) {
+              <a
+                class="sidebar-link"
+                routerLink="/{{ page.path }}"
+                routerLinkActive="sidebar-link--active"
+                [routerLinkActiveOptions]="{ exact: true }"
+              >
+                <span class="sidebar-link__icon">
+                  <app-icon [name]="page.icon" [size]="16"></app-icon>
+                </span>
+                <span class="sidebar-link__content">
+                  <span class="sidebar-link__title">{{ page.label }}</span>
+                  <span class="sidebar-link__meta">{{ page.eyebrow }}</span>
+                </span>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-footer__card">
+        <p class="sidebar-footer__eyebrow">Reference produit</p>
+        <p class="sidebar-footer__title">Sprint 2 · Shell & design system</p>
+        <p class="sidebar-footer__text">
+          Navigation, layout et pages de base poses. L'integration Figma complete arrive au Sprint 3.
+        </p>
+      </div>
+
+      <div class="sidebar-footer__tags">
+        <span>Reception</span>
+        <span>Medecin</span>
+        <span>Admin</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="shell__workspace">
+    <header class="topbar">
+      <div class="topbar__identity">
+        <div class="topbar__breadcrumbs">
+          @for (crumb of currentPage().breadcrumbs; track crumb; let last = $last) {
+            <span class="topbar__crumb" [class.topbar__crumb--current]="last">{{ crumb }}</span>
+            @if (!last) {
+              <span class="topbar__separator">/</span>
+            }
+          }
+        </div>
+
+        <div class="topbar__headline">
+          <p class="topbar__eyebrow">{{ currentPage().eyebrow }}</p>
+          <h1>{{ currentPage().title }}</h1>
+        </div>
+      </div>
+
+      <div class="topbar__controls">
+        <label class="searchbox" aria-label="Recherche">
+          <app-icon name="patients" [size]="14"></app-icon>
+          <input type="search" placeholder="Rechercher un patient, un dossier, un rendez-vous" />
+        </label>
+
+        <div class="topbar__pill">{{ todayLabel }}</div>
+        <div class="topbar__pill topbar__pill--accent">Fondation front</div>
+      </div>
+    </header>
+
+    <main class="workspace-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

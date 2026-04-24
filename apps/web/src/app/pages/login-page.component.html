@@ -1,0 +1,37 @@
+<section class="login-page">
+  <div class="login-page__intro">
+    <p class="login-page__eyebrow">MediCab</p>
+    <h1>Socle Angular prêt pour l'intégration produit.</h1>
+    <p class="login-page__text">
+      Le shell applicatif est posé. L'authentification réelle arrivera après l'intégration complète du prototype et des contrats API.
+    </p>
+
+    <div class="login-page__chips">
+      <span>Angular</span>
+      <span>.NET</span>
+      <span>PostgreSQL</span>
+      <span>Français</span>
+    </div>
+  </div>
+
+  <div class="login-card">
+    <div class="login-card__header">
+      <div class="login-card__mark">MC</div>
+      <div>
+        <p class="login-card__title">Connexion MediCab</p>
+        <p class="login-card__subtitle">Preview shell · Sprint 2</p>
+      </div>
+    </div>
+
+    <div class="login-card__roles">
+      @for (role of roleCards; track role.title) {
+        <article>
+          <h2>{{ role.title }}</h2>
+          <p>{{ role.description }}</p>
+        </article>
+      }
+    </div>
+
+    <a class="login-card__cta" routerLink="/tableau-de-bord">Entrer dans l'application</a>
+  </div>
+</section>
