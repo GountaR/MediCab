@@ -1,0 +1,41 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Local reference exports
+Medical Practice Management Prototype/
+
+# Node / frontend
+node_modules/
+dist/
+.angular/
+.npm/
+.pnpm-store/
+coverage/
+
+# .NET
+bin/
+obj/
+.vs/
+TestResults/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log

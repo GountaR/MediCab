@@ -1,0 +1,17 @@
+{
+  "/api": {
+    "target": "http://localhost:5080",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/openapi": {
+    "target": "http://localhost:5080",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/weatherforecast": {
+    "target": "http://localhost:5080",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
