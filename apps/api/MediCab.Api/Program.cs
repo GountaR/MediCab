@@ -1,3 +1,4 @@
+using MediCab.Api.Endpoints;
 using MediCab.Api.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,11 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<MediCabDbContext>();
+    await dbContext.Database.MigrateAsync();
+    await DevelopmentDataSeeder.SeedAsync(dbContext);
+
     app.MapOpenApi();
     app.UseCors("LocalDev");
 }
@@ -47,5 +53,9 @@ app.MapGet("/api/health", () => Results.Ok(new
     time = DateTimeOffset.UtcNow
 }))
 .WithName("GetHealth");
+
+app.MapUsersReadEndpoints();
+app.MapPatientsReadEndpoints();
+app.MapAppointmentsReadEndpoints();
 
 app.Run();
