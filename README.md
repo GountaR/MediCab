@@ -42,8 +42,8 @@ The project follows the delivery plan already validated during Sprint 0. The cur
    `make api-start`
 5. Start the Angular app:
    `make web-start`
-6. Stop PostgreSQL:
-   `make db-down`
+6. Stop everything cleanly:
+   `make stop`
 
 ## Recommended local workflow
 Use one terminal per long-running service.
@@ -77,12 +77,31 @@ curl http://localhost:5080/api/health
 ```
 
 ## Clean stop procedure
+Preferred command from the repository root:
+
+```bash
+cd /Users/youssefbennouna/Gestion_de_cabinet_medical/Workspace/MediCab
+make stop
+```
+
+`make stop` is the recommended shutdown path because it stops services in dependency order:
+1. Angular frontend on port `4200`
+2. .NET API on ports `5080` and `7080`
+3. PostgreSQL via Docker Compose on port `54329`
+
+The script first tries a graceful stop, then force-stops only the remaining listeners if needed, and finally verifies that all MediCab ports are free. This reduces the risk of leftover processes, stale port bindings, or confusing restarts on the next launch.
+
+Manual fallback if needed:
 1. Stop the Angular dev server with `Ctrl+C`
 2. Stop the .NET API with `Ctrl+C`
-3. Stop PostgreSQL from the repository root:
+3. Stop PostgreSQL:
    ```bash
    cd /Users/youssefbennouna/Gestion_de_cabinet_medical/Workspace/MediCab
    make db-down
+   ```
+4. Verify that nothing is still listening:
+   ```bash
+   lsof -nP -iTCP:4200 -iTCP:5080 -iTCP:7080 -iTCP:54329 -sTCP:LISTEN
    ```
 
 ## Useful local commands
@@ -90,6 +109,7 @@ curl http://localhost:5080/api/health
 - Start PostgreSQL: `make db-up`
 - Follow PostgreSQL logs: `make db-logs`
 - Stop PostgreSQL: `make db-down`
+- Stop all local services cleanly: `make stop`
 - Start API: `make api-start`
 - Start frontend: `make web-start`
 - Frontend production build:

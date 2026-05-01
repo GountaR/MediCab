@@ -9,6 +9,7 @@ help:
 	@echo "  make db-up    - start PostgreSQL with Docker Compose"
 	@echo "  make db-down  - stop PostgreSQL"
 	@echo "  make db-logs  - follow PostgreSQL logs"
+	@echo "  make stop     - stop frontend, API, and PostgreSQL in a safe order"
 	@echo "  make web-start - start the Angular app on port 4200"
 	@echo "  make api-start - start the .NET API on ports 5080/7080"
 
@@ -23,6 +24,9 @@ db-down:
 
 db-logs:
 	docker compose logs -f postgres
+
+stop:
+	@./scripts/dev/stop.sh
 
 web-start:
 	cd apps/web && npm start
