@@ -23,6 +23,15 @@ public static class DevelopmentDataSeeder
     private static readonly Guid DiagnosisOneId = Guid.Parse("a9999999-1111-1111-1111-111111111111");
     private static readonly Guid TreatmentOneId = Guid.Parse("b1111111-1111-1111-1111-111111111111");
     private static readonly Guid SecondaryDiagnosisOneId = Guid.Parse("b2222222-1111-1111-1111-111111111111");
+    private static readonly Guid PermissionPatientsReadId = Guid.Parse("b3333333-1111-1111-1111-111111111111");
+    private static readonly Guid PermissionConsultationsCreateId = Guid.Parse("b3333333-2222-1111-1111-111111111111");
+    private static readonly Guid PermissionInvoicesReadId = Guid.Parse("b3333333-3333-1111-1111-111111111111");
+    private static readonly Guid PermissionUsersUpdateId = Guid.Parse("b3333333-4444-1111-1111-111111111111");
+    private static readonly Guid PrescriptionOneId = Guid.Parse("b4444444-1111-1111-1111-111111111111");
+    private static readonly Guid PrescriptionItemOneId = Guid.Parse("b5555555-1111-1111-1111-111111111111");
+    private static readonly Guid DocumentOneId = Guid.Parse("b6666666-1111-1111-1111-111111111111");
+    private static readonly Guid AuditOneId = Guid.Parse("b7777777-1111-1111-1111-111111111111");
+    private static readonly Guid AuditTwoId = Guid.Parse("b7777777-2222-1111-1111-111111111111");
 
     public static async Task SeedAsync(MediCabDbContext dbContext, CancellationToken cancellationToken = default)
     {
@@ -114,6 +123,49 @@ public static class DevelopmentDataSeeder
             IsSystem = true,
             CreatedAt = now,
             UpdatedAt = now
+        };
+
+        var permissionPatientsRead = new Permission
+        {
+            Id = PermissionPatientsReadId,
+            ModuleCode = "PATIENTS",
+            ActionCode = "READ",
+            Label = "Consulter les patients"
+        };
+
+        var permissionConsultationsCreate = new Permission
+        {
+            Id = PermissionConsultationsCreateId,
+            ModuleCode = "CONSULTATIONS",
+            ActionCode = "CREATE",
+            Label = "Créer des consultations"
+        };
+
+        var permissionInvoicesRead = new Permission
+        {
+            Id = PermissionInvoicesReadId,
+            ModuleCode = "INVOICES",
+            ActionCode = "READ",
+            Label = "Consulter les factures"
+        };
+
+        var permissionUsersUpdate = new Permission
+        {
+            Id = PermissionUsersUpdateId,
+            ModuleCode = "USERS",
+            ActionCode = "UPDATE",
+            Label = "Modifier les utilisateurs"
+        };
+
+        var rolePermissions = new[]
+        {
+            new RolePermission { RoleId = RoleAdminId, PermissionId = PermissionPatientsReadId, CreatedAt = now },
+            new RolePermission { RoleId = RoleAdminId, PermissionId = PermissionInvoicesReadId, CreatedAt = now },
+            new RolePermission { RoleId = RoleAdminId, PermissionId = PermissionUsersUpdateId, CreatedAt = now },
+            new RolePermission { RoleId = RoleDoctorId, PermissionId = PermissionPatientsReadId, CreatedAt = now },
+            new RolePermission { RoleId = RoleDoctorId, PermissionId = PermissionConsultationsCreateId, CreatedAt = now },
+            new RolePermission { RoleId = RoleReceptionId, PermissionId = PermissionPatientsReadId, CreatedAt = now },
+            new RolePermission { RoleId = RoleReceptionId, PermissionId = PermissionInvoicesReadId, CreatedAt = now }
         };
 
         var adminUser = new User
@@ -357,12 +409,99 @@ public static class DevelopmentDataSeeder
             UpdatedAt = now.AddDays(-9)
         };
 
+        var prescriptionOne = new Prescription
+        {
+            Id = PrescriptionOneId,
+            ClinicId = ClinicId,
+            PatientId = PatientOneId,
+            DoctorUserId = DoctorUserId,
+            ConsultationId = ConsultationOneId,
+            IssuedOn = DateOnly.FromDateTime(now.Date.AddDays(-10)),
+            ExpiresOn = DateOnly.FromDateTime(now.Date.AddDays(80)),
+            Status = PrescriptionStatus.Active,
+            Instructions = "Prendre après les repas.",
+            CreatedAt = now.AddDays(-10),
+            UpdatedAt = now.AddDays(-10)
+        };
+
+        var prescriptionItemOne = new PrescriptionItem
+        {
+            Id = PrescriptionItemOneId,
+            PrescriptionId = PrescriptionOneId,
+            Dci = "Metformine",
+            BrandName = "Glucophage",
+            Dosage = "1000 mg",
+            Posology = "1 comprimé matin et soir",
+            Route = "Orale",
+            DurationLabel = "90 jours",
+            QuantityLabel = "180 comprimés",
+            RenewalCount = 0,
+            NonSubstitutable = false,
+            Instructions = "Pendant les repas"
+        };
+
+        var documentOne = new MedicalDocument
+        {
+            Id = DocumentOneId,
+            ClinicId = ClinicId,
+            PatientId = PatientOneId,
+            DoctorUserId = DoctorUserId,
+            ConsultationId = ConsultationOneId,
+            DocumentType = DocumentType.Ordonnance,
+            Status = DocumentStatus.Normal,
+            Title = "Ordonnance - Suivi diabète",
+            Subtitle = "Consultation du suivi trimestriel",
+            Summary = "Ordonnance de traitement chronique du diabète type 2.",
+            StorageKind = "generated",
+            StoragePath = "documents/prescriptions/ord-suivi-diabete.pdf",
+            MimeType = "application/pdf",
+            SizeBytes = 184320,
+            CreatedAt = now.AddDays(-10),
+            UpdatedAt = now.AddDays(-10)
+        };
+
+        var auditEntries = new[]
+        {
+            new AuditLog
+            {
+                Id = AuditOneId,
+                ClinicId = ClinicId,
+                UserId = DoctorUserId,
+                ActionType = AuditActionType.Connexion,
+                ModuleCode = "AUTH",
+                EntityType = "User",
+                EntityId = DoctorUserId,
+                Description = "Connexion réussie du Dr. Renard",
+                IpAddress = "192.168.1.45",
+                IsSuccess = true,
+                OccurredAt = now.AddHours(-1)
+            },
+            new AuditLog
+            {
+                Id = AuditTwoId,
+                ClinicId = ClinicId,
+                UserId = ReceptionUserId,
+                ActionType = AuditActionType.Modification,
+                ModuleCode = "APPOINTMENTS",
+                EntityType = "Appointment",
+                EntityId = AppointmentTwoId,
+                Description = "Passage du rendez-vous en statut accueilli",
+                IpAddress = "192.168.1.18",
+                IsSuccess = true,
+                OccurredAt = now.AddMinutes(-35)
+            }
+        };
+
         dbContext.AddRange(
             clinic,
             clinicSettings,
             roleAdmin,
             roleDoctor,
             roleReception,
+            permissionPatientsRead,
+            permissionConsultationsCreate,
+            permissionInvoicesRead,
+            permissionUsersUpdate,
             adminUser,
             doctorUser,
             receptionUser,
@@ -385,7 +524,14 @@ public static class DevelopmentDataSeeder
             diagnosisOne,
             secondaryDiagnosis,
             treatmentOne,
-            invoiceOne);
+            invoiceOne,
+            prescriptionOne,
+            prescriptionItemOne,
+            documentOne,
+            auditEntries[0],
+            auditEntries[1]);
+
+        dbContext.RolePermissions.AddRange(rolePermissions);
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }
@@ -479,6 +625,120 @@ public static class DevelopmentDataSeeder
                 CreatedAt = now,
                 UpdatedAt = now
             });
+        }
+
+        if (!await dbContext.Permissions.AnyAsync(item => item.Id == PermissionPatientsReadId, cancellationToken))
+        {
+            dbContext.Permissions.AddRange(
+                new Permission { Id = PermissionPatientsReadId, ModuleCode = "PATIENTS", ActionCode = "READ", Label = "Consulter les patients" },
+                new Permission { Id = PermissionConsultationsCreateId, ModuleCode = "CONSULTATIONS", ActionCode = "CREATE", Label = "Créer des consultations" },
+                new Permission { Id = PermissionInvoicesReadId, ModuleCode = "INVOICES", ActionCode = "READ", Label = "Consulter les factures" },
+                new Permission { Id = PermissionUsersUpdateId, ModuleCode = "USERS", ActionCode = "UPDATE", Label = "Modifier les utilisateurs" });
+        }
+
+        if (!await dbContext.RolePermissions.AnyAsync(cancellationToken))
+        {
+            dbContext.RolePermissions.AddRange(
+                new RolePermission { RoleId = RoleAdminId, PermissionId = PermissionPatientsReadId, CreatedAt = now },
+                new RolePermission { RoleId = RoleAdminId, PermissionId = PermissionInvoicesReadId, CreatedAt = now },
+                new RolePermission { RoleId = RoleAdminId, PermissionId = PermissionUsersUpdateId, CreatedAt = now },
+                new RolePermission { RoleId = RoleDoctorId, PermissionId = PermissionPatientsReadId, CreatedAt = now },
+                new RolePermission { RoleId = RoleDoctorId, PermissionId = PermissionConsultationsCreateId, CreatedAt = now },
+                new RolePermission { RoleId = RoleReceptionId, PermissionId = PermissionPatientsReadId, CreatedAt = now },
+                new RolePermission { RoleId = RoleReceptionId, PermissionId = PermissionInvoicesReadId, CreatedAt = now });
+        }
+
+        if (!await dbContext.Prescriptions.AnyAsync(item => item.Id == PrescriptionOneId, cancellationToken))
+        {
+            dbContext.Prescriptions.Add(new Prescription
+            {
+                Id = PrescriptionOneId,
+                ClinicId = ClinicId,
+                PatientId = PatientOneId,
+                DoctorUserId = DoctorUserId,
+                ConsultationId = ConsultationOneId,
+                IssuedOn = DateOnly.FromDateTime(now.Date.AddDays(-10)),
+                ExpiresOn = DateOnly.FromDateTime(now.Date.AddDays(80)),
+                Status = PrescriptionStatus.Active,
+                Instructions = "Prendre après les repas.",
+                CreatedAt = now.AddDays(-10),
+                UpdatedAt = now.AddDays(-10)
+            });
+        }
+
+        if (!await dbContext.PrescriptionItems.AnyAsync(item => item.Id == PrescriptionItemOneId, cancellationToken))
+        {
+            dbContext.PrescriptionItems.Add(new PrescriptionItem
+            {
+                Id = PrescriptionItemOneId,
+                PrescriptionId = PrescriptionOneId,
+                Dci = "Metformine",
+                BrandName = "Glucophage",
+                Dosage = "1000 mg",
+                Posology = "1 comprimé matin et soir",
+                Route = "Orale",
+                DurationLabel = "90 jours",
+                QuantityLabel = "180 comprimés",
+                RenewalCount = 0,
+                NonSubstitutable = false,
+                Instructions = "Pendant les repas"
+            });
+        }
+
+        if (!await dbContext.MedicalDocuments.AnyAsync(item => item.Id == DocumentOneId, cancellationToken))
+        {
+            dbContext.MedicalDocuments.Add(new MedicalDocument
+            {
+                Id = DocumentOneId,
+                ClinicId = ClinicId,
+                PatientId = PatientOneId,
+                DoctorUserId = DoctorUserId,
+                ConsultationId = ConsultationOneId,
+                DocumentType = DocumentType.Ordonnance,
+                Status = DocumentStatus.Normal,
+                Title = "Ordonnance - Suivi diabète",
+                Subtitle = "Consultation du suivi trimestriel",
+                Summary = "Ordonnance de traitement chronique du diabète type 2.",
+                StorageKind = "generated",
+                StoragePath = "documents/prescriptions/ord-suivi-diabete.pdf",
+                MimeType = "application/pdf",
+                SizeBytes = 184320,
+                CreatedAt = now.AddDays(-10),
+                UpdatedAt = now.AddDays(-10)
+            });
+        }
+
+        if (!await dbContext.AuditLogs.AnyAsync(item => item.Id == AuditOneId, cancellationToken))
+        {
+            dbContext.AuditLogs.AddRange(
+                new AuditLog
+                {
+                    Id = AuditOneId,
+                    ClinicId = ClinicId,
+                    UserId = DoctorUserId,
+                    ActionType = AuditActionType.Connexion,
+                    ModuleCode = "AUTH",
+                    EntityType = "User",
+                    EntityId = DoctorUserId,
+                    Description = "Connexion réussie du Dr. Renard",
+                    IpAddress = "192.168.1.45",
+                    IsSuccess = true,
+                    OccurredAt = now.AddHours(-1)
+                },
+                new AuditLog
+                {
+                    Id = AuditTwoId,
+                    ClinicId = ClinicId,
+                    UserId = ReceptionUserId,
+                    ActionType = AuditActionType.Modification,
+                    ModuleCode = "APPOINTMENTS",
+                    EntityType = "Appointment",
+                    EntityId = AppointmentTwoId,
+                    Description = "Passage du rendez-vous en statut accueilli",
+                    IpAddress = "192.168.1.18",
+                    IsSuccess = true,
+                    OccurredAt = now.AddMinutes(-35)
+                });
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

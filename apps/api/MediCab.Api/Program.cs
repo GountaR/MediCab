@@ -60,5 +60,9 @@ app.MapAppointmentsReadEndpoints();
 app.MapConsultationsReadEndpoints();
 app.MapInvoicesReadEndpoints();
 app.MapSettingsReadEndpoints();
+app.MapPrescriptionsReadEndpoints();
+app.MapDocumentsReadEndpoints();
+app.MapRolesReadEndpoints();
+app.MapAuditReadEndpoints();
 
 app.Run();

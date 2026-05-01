@@ -72,6 +72,46 @@ internal static class ApiDisplayMapper
         _ => status.ToString()
     };
 
+    public static string ToDisplay(this PrescriptionStatus status) => status switch
+    {
+        PrescriptionStatus.Active => "Active",
+        PrescriptionStatus.Expiree => "Expirée",
+        PrescriptionStatus.Annulee => "Annulée",
+        PrescriptionStatus.Renouvelee => "Renouvelée",
+        _ => status.ToString()
+    };
+
+    public static string ToDisplay(this DocumentStatus status) => status switch
+    {
+        DocumentStatus.Normal => "Normal",
+        DocumentStatus.Anormal => "Anormal",
+        DocumentStatus.Critique => "Critique",
+        DocumentStatus.EnAttente => "En attente",
+        _ => status.ToString()
+    };
+
+    public static string ToDisplay(this DocumentType type) => type switch
+    {
+        DocumentType.Analyse => "Analyse",
+        DocumentType.Imagerie => "Imagerie",
+        DocumentType.CompteRendu => "Compte-rendu",
+        DocumentType.Courrier => "Courrier",
+        DocumentType.Ordonnance => "Ordonnance",
+        _ => type.ToString()
+    };
+
+    public static string ToDisplay(this AuditActionType action) => action switch
+    {
+        AuditActionType.Connexion => "Connexion",
+        AuditActionType.Deconnexion => "Déconnexion",
+        AuditActionType.Creation => "Création",
+        AuditActionType.Modification => "Modification",
+        AuditActionType.Suppression => "Suppression",
+        AuditActionType.Export => "Export",
+        AuditActionType.AccesRefuse => "Accès refusé",
+        _ => action.ToString()
+    };
+
     public static string FullName(this User user) => $"{user.FirstName} {user.LastName}";
 
     public static string FullName(this Patient patient) => $"{patient.FirstName} {patient.LastName}";
