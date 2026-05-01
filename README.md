@@ -45,6 +45,62 @@ The project follows the delivery plan already validated during Sprint 0. The cur
 6. Stop PostgreSQL:
    `make db-down`
 
+## Recommended local workflow
+Use one terminal per long-running service.
+
+### Terminal 1 - PostgreSQL
+```bash
+cd /Users/youssefbennouna/Gestion_de_cabinet_medical/Workspace/MediCab
+make db-up
+```
+
+### Terminal 2 - .NET API
+```bash
+cd /Users/youssefbennouna/Gestion_de_cabinet_medical/Workspace/MediCab
+make api-start
+```
+
+### Terminal 3 - Angular frontend
+```bash
+cd /Users/youssefbennouna/Gestion_de_cabinet_medical/Workspace/MediCab
+make web-start
+```
+
+## Local verification checklist
+- Web UI: `http://localhost:4200`
+- API health: `http://localhost:5080/api/health`
+- PostgreSQL: `localhost:54329`
+
+Quick API test:
+```bash
+curl http://localhost:5080/api/health
+```
+
+## Clean stop procedure
+1. Stop the Angular dev server with `Ctrl+C`
+2. Stop the .NET API with `Ctrl+C`
+3. Stop PostgreSQL from the repository root:
+   ```bash
+   cd /Users/youssefbennouna/Gestion_de_cabinet_medical/Workspace/MediCab
+   make db-down
+   ```
+
+## Useful local commands
+- Check prerequisites: `make doctor`
+- Start PostgreSQL: `make db-up`
+- Follow PostgreSQL logs: `make db-logs`
+- Stop PostgreSQL: `make db-down`
+- Start API: `make api-start`
+- Start frontend: `make web-start`
+- Frontend production build:
+  ```bash
+  cd apps/web && npm run build
+  ```
+- API build:
+  ```bash
+  cd apps/api/MediCab.Api && $HOME/.dotnet/dotnet build
+  ```
+
 ## Local ports
 - Angular web app: `4200`
 - .NET API HTTP: `5080`
