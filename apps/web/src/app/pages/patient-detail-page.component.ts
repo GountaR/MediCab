@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { map } from 'rxjs/operators';
+import { catchError, map, of, startWith, switchMap } from 'rxjs';
 
 import { DATE_REFERENCE_DEMO, calculerAge, comparerRendezVous, convertirDateFr, formatMontant, getInitiales, getNomComplet } from '../data/medicab-demo.data';
-import { MedicabDemoStore } from '../data/medicab-demo.store';
 import { StatutFacture, StatutPatient, StatutRendezVous } from '../data/medicab-demo.types';
+import { PatientDetailOverview, PatientsApiService } from '../services/patients-api.service';
 import { StatusChipComponent } from '../shared/status-chip.component';
 
 @Component({
@@ -17,7 +17,7 @@ import { StatusChipComponent } from '../shared/status-chip.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PatientDetailPageComponent {
-  protected readonly demoStore = inject(MedicabDemoStore);
+  private readonly patientsApi = inject(PatientsApiService);
   private readonly route = inject(ActivatedRoute);
 
   private readonly patientId = toSignal(
@@ -25,11 +25,44 @@ export class PatientDetailPageComponent {
     { initialValue: this.route.snapshot.paramMap.get('id') }
   );
 
+  private readonly detailState = toSignal(
+    toObservable(this.patientId).pipe(
+      switchMap((patientId) => {
+        if (!patientId) {
+          return of({ loading: false, data: null, error: '' });
+        }
+
+        return this.patientsApi.getPatientOverview(patientId).pipe(
+          map((data) => ({ loading: false, data, error: '' })),
+          startWith({ loading: true, data: null, error: '' }),
+          catchError(() =>
+            of({
+              loading: false,
+              data: null,
+              error: "Impossible de charger ce dossier patient depuis l'API."
+            })
+          )
+        );
+      })
+    ),
+    {
+      initialValue: {
+        loading: true,
+        data: null as PatientDetailOverview | null,
+        error: ''
+      }
+    }
+  );
+
   protected readonly referenceDate = DATE_REFERENCE_DEMO;
-  protected readonly patient = computed(() => this.demoStore.getPatient(this.patientId()));
-  protected readonly medecin = computed(() => this.demoStore.getMedecin(this.patient()?.medecinId));
-  protected readonly rendezVous = computed(() => this.demoStore.getRendezVousPatient(this.patientId()));
-  protected readonly facturesOuvertes = computed(() => this.demoStore.getFacturesOuvertesPatient(this.patientId()));
+  protected readonly chargement = computed(() => this.detailState().loading);
+  protected readonly erreur = computed(() => this.detailState().error);
+  protected readonly patient = computed(() => this.detailState().data?.patient);
+  protected readonly medecin = computed(() =>
+    this.detailState().data?.medecins.find((medecin) => medecin.id === this.patient()?.medecinId)
+  );
+  protected readonly rendezVous = computed(() => this.detailState().data?.rendezVous ?? []);
+  protected readonly facturesOuvertes = computed(() => this.detailState().data?.facturesOuvertes ?? []);
   protected readonly age = computed(() => (this.patient() ? calculerAge(this.patient()!.dateNaissance) : null));
   protected readonly nomComplet = computed(() => (this.patient() ? getNomComplet(this.patient()!) : ''));
   protected readonly initials = computed(() => (this.patient() ? getInitiales(this.patient()!) : ''));

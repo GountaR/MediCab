@@ -78,12 +78,22 @@
     <div class="list-card__header">
       <div>
         <p>Patients</p>
-        <h3>{{ patientsFiltres().length }} résultat(s)</h3>
+        <h3>{{ vueSynthese().total }} résultat(s)</h3>
       </div>
       <span>10 lignes par page</span>
     </div>
 
-    @if (pageCourante().length) {
+    @if (erreur()) {
+      <div class="empty-state">
+        <h3>Connexion API en échec</h3>
+        <p>{{ erreur() }}</p>
+      </div>
+    } @else if (chargement()) {
+      <div class="empty-state">
+        <h3>Chargement des patients</h3>
+        <p>Nous récupérons les données réelles depuis l'API MediCab.</p>
+      </div>
+    } @else if (pageCourante().length) {
       <div class="patient-rows">
         @for (row of pageCourante(); track row.patient.id) {
           <a class="patient-row" routerLink="/patients/{{ row.patient.id }}">
@@ -140,7 +150,7 @@
     } @else {
       <div class="empty-state">
         <h3>Aucun patient ne correspond à ces filtres.</h3>
-        <p>Réinitialise la recherche ou élargis les critères pour retrouver un dossier.</p>
+        <p>Réinitialise la recherche ou élargis les critères pour retrouver un dossier via l'API.</p>
         <button type="button" (click)="resetFilters()">Tout réafficher</button>
       </div>
     }

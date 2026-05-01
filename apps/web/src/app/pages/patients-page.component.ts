@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { catchError, debounceTime, map, of, startWith, switchMap } from 'rxjs';
 
 import { STATUTS_PATIENT, calculerAge, formatMontant, getNomComplet } from '../data/medicab-demo.data';
-import { MedicabDemoStore } from '../data/medicab-demo.store';
 import { Patient, StatutPatient } from '../data/medicab-demo.types';
+import { PatientsApiService } from '../services/patients-api.service';
 import { StatusChipComponent } from '../shared/status-chip.component';
 
 const ITEMS_PAR_PAGE = 10;
@@ -21,46 +23,71 @@ type FiltreMedecin = string | 'Tous';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PatientsPageComponent {
-  private readonly demoStore = inject(MedicabDemoStore);
+  private readonly patientsApi = inject(PatientsApiService);
 
   protected readonly recherche = signal('');
   protected readonly filtreStatut = signal<FiltreStatut>('Tous');
   protected readonly filtreMedecin = signal<FiltreMedecin>('Tous');
   protected readonly page = signal(1);
 
-  protected readonly medecins = this.demoStore.medecins;
   protected readonly statuts = ['Tous', ...STATUTS_PATIENT] as const;
+  private readonly medecinsState = toSignal(
+    this.patientsApi.getDoctors().pipe(catchError(() => of([]))),
+    { initialValue: [] }
+  );
+
+  protected readonly medecins = computed(() => this.medecinsState());
+
+  private readonly patientsState = toSignal(
+    toObservable(
+      computed(() => ({
+        search: this.recherche().trim(),
+        status: this.filtreStatut() === 'Tous' ? undefined : (this.filtreStatut() as StatutPatient),
+        doctorId: this.filtreMedecin() === 'Tous' ? undefined : this.filtreMedecin(),
+        page: this.page(),
+        pageSize: ITEMS_PAR_PAGE
+      }))
+    ).pipe(
+      debounceTime(150),
+      switchMap((query) =>
+        this.patientsApi.getPatients(query).pipe(
+          map((response) => ({ loading: false, response, error: '' })),
+          startWith({ loading: true, response: null, error: '' }),
+          catchError(() =>
+            of({
+              loading: false,
+              response: null,
+              error: "Impossible de charger la liste patients depuis l'API."
+            })
+          )
+        )
+      )
+    ),
+    {
+      initialValue: {
+        loading: true,
+        response: null as { items: Patient[]; page: number; pageSize: number; total: number } | null,
+        error: ''
+      }
+    }
+  );
 
   protected readonly patientsFiltres = computed(() => {
-    const recherche = this.recherche().trim().toLowerCase();
-    const filtreStatut = this.filtreStatut();
-    const filtreMedecin = this.filtreMedecin();
-
-    return this.demoStore.patients().filter((patient) => {
-      const correspondRecherche =
-        recherche.length === 0 ||
-        getNomComplet(patient).toLowerCase().includes(recherche) ||
-        patient.dpi.toLowerCase().includes(recherche) ||
-        patient.telephone.includes(recherche) ||
-        patient.email.toLowerCase().includes(recherche);
-
-      const correspondStatut = filtreStatut === 'Tous' || patient.statut === filtreStatut;
-      const correspondMedecin = filtreMedecin === 'Tous' || patient.medecinId === filtreMedecin;
-
-      return correspondRecherche && correspondStatut && correspondMedecin;
-    });
+    return this.patientsState().response?.items ?? [];
   });
 
-  protected readonly totalPages = computed(() => Math.max(1, Math.ceil(this.patientsFiltres().length / ITEMS_PAR_PAGE)));
+  protected readonly chargement = computed(() => this.patientsState().loading);
+  protected readonly erreur = computed(() => this.patientsState().error);
+  protected readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil((this.patientsState().response?.total ?? 0) / ITEMS_PAR_PAGE))
+  );
 
   protected readonly pageCourante = computed(() => {
-    const debut = (this.page() - 1) * ITEMS_PAR_PAGE;
     return this.patientsFiltres()
-      .slice(debut, debut + ITEMS_PAR_PAGE)
       .map((patient) => ({
         patient,
         nomComplet: getNomComplet(patient),
-        medecin: this.demoStore.getMedecin(patient.medecinId),
+        medecin: this.medecins().find((medecin) => medecin.id === patient.medecinId),
         age: calculerAge(patient.dateNaissance),
         solde: formatMontant(patient.soldeImpaye ?? 0)
       }));
@@ -68,8 +95,9 @@ export class PatientsPageComponent {
 
   protected readonly vueSynthese = computed(() => {
     const patients = this.patientsFiltres();
+    const total = this.patientsState().response?.total ?? 0;
     return {
-      total: patients.length,
+      total,
       actifs: patients.filter((patient) => patient.statut === 'Actif').length,
       enAttente: patients.filter((patient) => patient.statut === 'En attente').length,
       avecImpayes: patients.filter((patient) => (patient.soldeImpaye ?? 0) > 0).length

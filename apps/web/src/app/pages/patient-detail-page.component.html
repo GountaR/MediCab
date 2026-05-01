@@ -1,4 +1,16 @@
-@if (patient(); as patientRecord) {
+@if (erreur()) {
+  <section class="not-found-card">
+    <p>Connexion API en échec</p>
+    <h2>{{ erreur() }}</h2>
+    <a routerLink="/patients">Retour à la liste patients</a>
+  </section>
+} @else if (chargement()) {
+  <section class="not-found-card">
+    <p>Chargement du dossier</p>
+    <h2>Nous récupérons les informations réelles du patient depuis l'API MediCab.</h2>
+    <a routerLink="/patients">Retour à la liste patients</a>
+  </section>
+} @else if (patient(); as patientRecord) {
   <section class="detail-page">
     <div class="detail-topbar">
       <a routerLink="/patients">← Retour à la liste</a>
@@ -33,8 +45,8 @@
 
       <div class="hero-card__referent">
         <span>Médecin référent</span>
-        <strong>Dr. {{ medecin()?.prenom }} {{ medecin()?.nom }}</strong>
-        <small>{{ medecin()?.specialite }}</small>
+        <strong>{{ medecin() ? 'Dr. ' + medecin()!.prenom + ' ' + medecin()!.nom : 'Non affecté' }}</strong>
+        <small>{{ medecin()?.specialite || 'Affectation à confirmer' }}</small>
       </div>
     </article>
 
@@ -76,7 +88,7 @@
             <dd>{{ patientRecord.dernierVisite || 'Aucune' }}</dd>
           </div>
           <div>
-            <dt>Etiquettes</dt>
+            <dt>Étiquettes</dt>
             <dd>{{ patientRecord.etiquettes?.length ? patientRecord.etiquettes?.join(', ') : 'Aucune' }}</dd>
           </div>
         </dl>
@@ -116,7 +128,7 @@
             <div class="list-row">
               <div>
                 <strong>{{ rendezVousItem.date }} · {{ rendezVousItem.heure }}</strong>
-                <small>{{ rendezVousItem.type }} · Dr. {{ demoStore.getMedecin(rendezVousItem.medecinId)?.nom }}</small>
+                <small>{{ rendezVousItem.type }} · {{ medecin() ? 'Dr. ' + medecin()!.nom : 'Médecin référent' }}</small>
               </div>
               <app-status-chip [tone]="appointmentTone(rendezVousItem.statut)">{{ rendezVousItem.statut }}</app-status-chip>
             </div>
@@ -160,7 +172,7 @@
 } @else {
   <section class="not-found-card">
     <p>Patient introuvable</p>
-    <h2>Le dossier demandé n'existe pas dans le mock actuel.</h2>
+    <h2>Le dossier demandé n'existe pas dans l'API MediCab actuelle.</h2>
     <a routerLink="/patients">Retour à la liste patients</a>
   </section>
 }

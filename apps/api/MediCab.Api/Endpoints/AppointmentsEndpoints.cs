@@ -44,6 +44,11 @@ public static class AppointmentsEndpoints
                 appointment.ScheduledStartAt >= startOffset && appointment.ScheduledStartAt < endOffset);
         }
 
+        if (query.PatientId is not null)
+        {
+            appointmentsQuery = appointmentsQuery.Where(appointment => appointment.PatientId == query.PatientId);
+        }
+
         if (query.DoctorId is not null)
         {
             appointmentsQuery = appointmentsQuery.Where(appointment => appointment.DoctorUserId == query.DoctorId);
@@ -125,6 +130,8 @@ public static class AppointmentsEndpoints
     private sealed class AppointmentsQuery
     {
         public DateOnly? Date { get; init; }
+
+        public Guid? PatientId { get; init; }
 
         public Guid? DoctorId { get; init; }
 
