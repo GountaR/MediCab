@@ -53,6 +53,25 @@ internal static class ApiDisplayMapper
         _ => type.ToString()
     };
 
+    public static string ToDisplay(this ConsultationStatus status) => status switch
+    {
+        ConsultationStatus.Brouillon => "Brouillon",
+        ConsultationStatus.Finalisee => "Finalisée",
+        ConsultationStatus.Signee => "Signée",
+        _ => status.ToString()
+    };
+
+    public static string ToDisplay(this InvoiceStatus status) => status switch
+    {
+        InvoiceStatus.Brouillon => "Brouillon",
+        InvoiceStatus.Envoyee => "Envoyée",
+        InvoiceStatus.Reglee => "Réglée",
+        InvoiceStatus.EnRetard => "En retard",
+        InvoiceStatus.Partielle => "Partielle",
+        InvoiceStatus.Annulee => "Annulée",
+        _ => status.ToString()
+    };
+
     public static string FullName(this User user) => $"{user.FirstName} {user.LastName}";
 
     public static string FullName(this Patient patient) => $"{patient.FirstName} {patient.LastName}";

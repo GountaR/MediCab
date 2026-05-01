@@ -19,11 +19,16 @@ public static class DevelopmentDataSeeder
     private static readonly Guid AppointmentTwoId = Guid.Parse("a5555555-2222-1111-1111-111111111111");
     private static readonly Guid ConsultationOneId = Guid.Parse("a6666666-1111-1111-1111-111111111111");
     private static readonly Guid InvoiceOneId = Guid.Parse("a7777777-1111-1111-1111-111111111111");
+    private static readonly Guid ClinicSettingsId = Guid.Parse("a8888888-1111-1111-1111-111111111111");
+    private static readonly Guid DiagnosisOneId = Guid.Parse("a9999999-1111-1111-1111-111111111111");
+    private static readonly Guid TreatmentOneId = Guid.Parse("b1111111-1111-1111-1111-111111111111");
+    private static readonly Guid SecondaryDiagnosisOneId = Guid.Parse("b2222222-1111-1111-1111-111111111111");
 
     public static async Task SeedAsync(MediCabDbContext dbContext, CancellationToken cancellationToken = default)
     {
         if (await dbContext.Clinics.AnyAsync(cancellationToken))
         {
+            await EnsureSupplementalDataAsync(dbContext, cancellationToken);
             return;
         }
 
@@ -42,6 +47,40 @@ public static class DevelopmentDataSeeder
             Rpps = "00003456789",
             CreatedAt = now,
             UpdatedAt = now
+        };
+
+        var clinicSettings = new ClinicSettings
+        {
+            Id = ClinicSettingsId,
+            ClinicId = ClinicId,
+            DefaultAppointmentDurationMinutes = 30,
+            NewPatientDurationMinutes = 45,
+            ProcedureDurationMinutes = 60,
+            EmailReminderHours = 24,
+            AllowWalkInConsultations = true,
+            AutoPrepareInvoice = true,
+            ShowDebtAlerts = true,
+            PaymentDelayDays = 15,
+            OverdueReminderDays = 30,
+            MinPasswordLength = 8,
+            SessionTimeoutMinutes = 60,
+            ForceTwoFactor = false,
+            AuditConnections = true,
+            BackupFrequency = "Quotidienne",
+            BackupRetentionDays = 30,
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        var schedules = new[]
+        {
+            new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 1, IsOpen = true, StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(19, 0) },
+            new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 2, IsOpen = true, StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(19, 0) },
+            new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 3, IsOpen = true, StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(17, 0) },
+            new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 4, IsOpen = true, StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(19, 0) },
+            new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 5, IsOpen = true, StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(18, 0) },
+            new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 6, IsOpen = true, StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(12, 0) },
+            new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 7, IsOpen = false }
         };
 
         var roleAdmin = new Role
@@ -258,6 +297,46 @@ public static class DevelopmentDataSeeder
             Respiratory = "Auscultation claire"
         };
 
+        var diagnosisOne = new PatientDiagnosis
+        {
+            Id = DiagnosisOneId,
+            PatientId = PatientOneId,
+            ConsultationId = ConsultationOneId,
+            Icd10Code = "E11.9",
+            Label = "Diabète sucré de type 2",
+            Status = DiagnosisStatus.Chronique,
+            StartedOn = new DateOnly(2018, 4, 15),
+            Notes = "Sous Metformine, HbA1c cible < 7,5%.",
+            CreatedAt = now.AddDays(-10),
+            UpdatedAt = now.AddDays(-10)
+        };
+
+        var secondaryDiagnosis = new ConsultationSecondaryDiagnosis
+        {
+            Id = SecondaryDiagnosisOneId,
+            ConsultationId = ConsultationOneId,
+            Label = "I10 - Hypertension artérielle essentielle"
+        };
+
+        var treatmentOne = new ActiveTreatment
+        {
+            Id = TreatmentOneId,
+            PatientId = PatientOneId,
+            PrescriberUserId = DoctorUserId,
+            ConsultationId = ConsultationOneId,
+            Dci = "Metformine",
+            BrandName = "Glucophage",
+            Dosage = "1000 mg",
+            Posology = "1 comprimé matin et soir pendant les repas",
+            Route = "Orale",
+            StartedOn = new DateOnly(2018, 4, 15),
+            Status = TreatmentStatus.Actif,
+            NonSubstitutable = false,
+            Notes = "Traitement chronique bien toléré.",
+            CreatedAt = now.AddDays(-10),
+            UpdatedAt = now.AddDays(-10)
+        };
+
         var invoiceOne = new Invoice
         {
             Id = InvoiceOneId,
@@ -280,6 +359,7 @@ public static class DevelopmentDataSeeder
 
         dbContext.AddRange(
             clinic,
+            clinicSettings,
             roleAdmin,
             roleDoctor,
             roleReception,
@@ -291,11 +371,115 @@ public static class DevelopmentDataSeeder
             patientTwo,
             patientOneAllergy,
             patientOneTag,
+            schedules[0],
+            schedules[1],
+            schedules[2],
+            schedules[3],
+            schedules[4],
+            schedules[5],
+            schedules[6],
             appointmentOne,
             appointmentTwo,
             consultationOne,
             consultationExam,
+            diagnosisOne,
+            secondaryDiagnosis,
+            treatmentOne,
             invoiceOne);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private static async Task EnsureSupplementalDataAsync(MediCabDbContext dbContext, CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        if (!await dbContext.ClinicSettings.AnyAsync(item => item.ClinicId == ClinicId, cancellationToken))
+        {
+            dbContext.ClinicSettings.Add(new ClinicSettings
+            {
+                Id = ClinicSettingsId,
+                ClinicId = ClinicId,
+                DefaultAppointmentDurationMinutes = 30,
+                NewPatientDurationMinutes = 45,
+                ProcedureDurationMinutes = 60,
+                EmailReminderHours = 24,
+                AllowWalkInConsultations = true,
+                AutoPrepareInvoice = true,
+                ShowDebtAlerts = true,
+                PaymentDelayDays = 15,
+                OverdueReminderDays = 30,
+                MinPasswordLength = 8,
+                SessionTimeoutMinutes = 60,
+                ForceTwoFactor = false,
+                AuditConnections = true,
+                BackupFrequency = "Quotidienne",
+                BackupRetentionDays = 30,
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+        }
+
+        if (!await dbContext.ClinicSchedules.AnyAsync(item => item.ClinicId == ClinicId, cancellationToken))
+        {
+            dbContext.ClinicSchedules.AddRange(
+                new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 1, IsOpen = true, StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(19, 0) },
+                new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 2, IsOpen = true, StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(19, 0) },
+                new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 3, IsOpen = true, StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(17, 0) },
+                new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 4, IsOpen = true, StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(19, 0) },
+                new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 5, IsOpen = true, StartTime = new TimeOnly(8, 0), EndTime = new TimeOnly(18, 0) },
+                new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 6, IsOpen = true, StartTime = new TimeOnly(9, 0), EndTime = new TimeOnly(12, 0) },
+                new ClinicSchedule { ClinicId = ClinicId, DayOfWeek = 7, IsOpen = false });
+        }
+
+        if (!await dbContext.PatientDiagnoses.AnyAsync(item => item.Id == DiagnosisOneId, cancellationToken))
+        {
+            dbContext.PatientDiagnoses.Add(new PatientDiagnosis
+            {
+                Id = DiagnosisOneId,
+                PatientId = PatientOneId,
+                ConsultationId = ConsultationOneId,
+                Icd10Code = "E11.9",
+                Label = "Diabète sucré de type 2",
+                Status = DiagnosisStatus.Chronique,
+                StartedOn = new DateOnly(2018, 4, 15),
+                Notes = "Sous Metformine, HbA1c cible < 7,5%.",
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+        }
+
+        if (!await dbContext.ConsultationSecondaryDiagnoses.AnyAsync(item => item.Id == SecondaryDiagnosisOneId, cancellationToken))
+        {
+            dbContext.ConsultationSecondaryDiagnoses.Add(new ConsultationSecondaryDiagnosis
+            {
+                Id = SecondaryDiagnosisOneId,
+                ConsultationId = ConsultationOneId,
+                Label = "I10 - Hypertension artérielle essentielle"
+            });
+        }
+
+        if (!await dbContext.ActiveTreatments.AnyAsync(item => item.Id == TreatmentOneId, cancellationToken))
+        {
+            dbContext.ActiveTreatments.Add(new ActiveTreatment
+            {
+                Id = TreatmentOneId,
+                PatientId = PatientOneId,
+                PrescriberUserId = DoctorUserId,
+                ConsultationId = ConsultationOneId,
+                Dci = "Metformine",
+                BrandName = "Glucophage",
+                Dosage = "1000 mg",
+                Posology = "1 comprimé matin et soir pendant les repas",
+                Route = "Orale",
+                StartedOn = new DateOnly(2018, 4, 15),
+                Status = TreatmentStatus.Actif,
+                NonSubstitutable = false,
+                Notes = "Traitement chronique bien toléré.",
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+        }
 
         await dbContext.SaveChangesAsync(cancellationToken);
     }

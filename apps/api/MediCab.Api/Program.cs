@@ -57,5 +57,8 @@ app.MapGet("/api/health", () => Results.Ok(new
 app.MapUsersReadEndpoints();
 app.MapPatientsReadEndpoints();
 app.MapAppointmentsReadEndpoints();
+app.MapConsultationsReadEndpoints();
+app.MapInvoicesReadEndpoints();
+app.MapSettingsReadEndpoints();
 
 app.Run();
